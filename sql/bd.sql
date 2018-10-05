@@ -14,6 +14,7 @@ CREATE TABLE [notification] (
 CREATE TABLE [course] (
   [id] int primary key identity,
   [name] varchar(50) NOT NULL,
+  [shortname] varchar(30) NOT NULL,
   [description] varchar(300) NOT NULL,
   [area_id] int NOT NULL
 );
@@ -29,7 +30,6 @@ CREATE TABLE [post] (
   [title] varchar(100) NOT NULL,
   [message] varchar(MAX) NOT NULL,
   [posted_on] datetime NOT NULL,
-  [views] int NOT NULL,
   [area_id] int NOT NULL
 );
 
@@ -43,11 +43,11 @@ CREATE TABLE [comment] (
 
 CREATE TABLE [user] (
   [id] int primary key identity,
-  [email] varchar(255) NOT NULL,
-  [password] varchar(30) NOT NULL,
+  [email] varchar(255) NULL,
+  [password] varchar(64) NULL,
   [username] varchar(30) NOT NULL,
   [level] int NOT NULL,
-  [profile_picture] varbinary(max) NOT NULL
+  [profile_picture] varbinary(max) NULL
 );
 
 CREATE TABLE [user_login] (
