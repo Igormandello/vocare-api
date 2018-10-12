@@ -96,9 +96,13 @@ AS
 
 --Selects the comments from a post @id
 CREATE PROCEDURE sp_post_comments
-    @id int
+    @id int,
+    @user_id int
 AS
  SELECT * from comment where post_id = @id ORDER BY commented_on
+ 
+ IF NOT EXISTS(SELECT * FROM post_view WHERE post_id = @id AND user_id = @user_id)
+    INSERT INTO post_view values (@id, @user_id)
 
 ---------------------------------------------------------------------------
 
@@ -113,6 +117,18 @@ AS
     RAISERROR ('%d: %s', 16, 1, 100, 'Invalid area')
  ELSE
     INSERT INTO post values (@user_id, @title, @message, (SELECT GETDATE()), (SELECT id FROM area WHERE name = @area))
+    
+---------------------------------------------------------------------------
+
+--Ads a tag to a post
+CREATE PROCEDURE sp_add_tag
+    @post_id int,
+    @tag varchar(30)
+AS
+ IF NOT EXISTS(SELECT * FROM tag WHERE name = @tag)
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid area')
+ ELSE
+    INSERT INTO post_tag values (@post_id, (SELECT id FROM tag WHERE name = @tag))
 
 ---------------------------------------------------------------------------
 
@@ -124,7 +140,7 @@ CREATE PROCEDURE sp_comment_create
 AS
  INSERT INTO comment values (@post_id, @user_id, @message, (SELECT GETDATE()))
  
- ---------------------------------------------------------------------------
+---------------------------------------------------------------------------
 
 --Selects @amount couses from starting from @offset of @area
 --If @area isn't specified, all areas are selected
@@ -144,7 +160,7 @@ AS
     SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(ORDER BY name) AS number, * FROM course) indexes WHERE indexes.number > @offset
     
      
- ---------------------------------------------------------------------------
+---------------------------------------------------------------------------
 
 --Selects all the area names
 CREATE PROCEDURE sp_area_names
@@ -158,3 +174,10 @@ AS
         ) indexes WHERE indexes.number > @offset
  ELSE
     SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(ORDER BY name) AS number, * FROM course) indexes WHERE indexes.number > @offset
+    
+---------------------------------------------------------------------------
+
+CREATE PROCEDURE sp_post_views
+    @id int
+AS
+ SELECT COUNT(*) FROM post_view WHERE post_id = @id
