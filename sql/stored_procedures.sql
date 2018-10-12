@@ -55,3 +55,21 @@ AS
     INSERT INTO user_login VALUES (@id, @access_token, (SELECT id AS prover_id FROM provider WHERE name = @provider))
  
 ---------------------------------------------------------------------------
+
+--Counts the unreaden notifications from an unser
+CREATE PROCEDURE sp_unreaden_notifications
+    @id int
+AS
+ SELECT COUNT(*) as amount FROM notification WHERE user_id = @id and state = 0
+
+---------------------------------------------------------------------------
+
+--Selects the last @amount notifications from an user @id, skipping the @offset
+CREATE PROCEDURE sp_user_notifications
+    @id int,
+    @offset int,
+    @amount int
+AS
+ SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(order by data) AS number, * FROM notification WHERE user_id = @id) indexes WHERE indexes.number > @offset
+
+---------------------------------------------------------------------------
