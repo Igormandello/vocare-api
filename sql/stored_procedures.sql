@@ -85,3 +85,41 @@ AS
 
 ---------------------------------------------------------------------------
 
+--Selects the last @amount posts in the discussion, skipping the @offset
+CREATE PROCEDURE sp_discussion_posts
+    @offset int,
+    @amount int
+AS
+ SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(order by posted_on DESC) AS number, * FROM post) indexes WHERE indexes.number > @offset
+
+---------------------------------------------------------------------------
+
+--Selects the comments from a post @id
+CREATE PROCEDURE sp_post_comments
+    @id int
+AS
+ SELECT * from comment where post_id = @id ORDER BY commented_on
+
+---------------------------------------------------------------------------
+
+--Creates a post in the discussion area
+CREATE PROCEDURE sp_post_create
+    @user_id int,
+    @title varchar(100),
+    @message varchar(MAX),
+    @area varchar(30)
+AS
+ IF NOT EXISTS(SELECT * FROM area WHERE name = @area)
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid area')
+ ELSE
+    INSERT INTO post values (@user_id, @title, @message, (SELECT GETDATE()), (SELECT id FROM area WHERE name = @area))
+
+---------------------------------------------------------------------------
+
+--Creates a comment to a post
+CREATE PROCEDURE sp_comment_create
+    @post_id int,
+    @user_id int,
+    @message varchar(MAX)
+AS
+ INSERT INTO comment values (@post_id, @user_id, @message, (SELECT GETDATE()))
