@@ -81,7 +81,7 @@ CREATE PROCEDURE sp_user_notifications
     @offset int,
     @amount int
 AS
- SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(order by data) AS number, * FROM notification WHERE user_id = @id) indexes WHERE indexes.number > @offset
+ SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(ORDER BY data) AS number, * FROM notification WHERE user_id = @id) indexes WHERE indexes.number > @offset
 
 ---------------------------------------------------------------------------
 
@@ -90,7 +90,7 @@ CREATE PROCEDURE sp_discussion_posts
     @offset int,
     @amount int
 AS
- SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(order by posted_on DESC) AS number, * FROM post) indexes WHERE indexes.number > @offset
+ SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(ORDER BY posted_on DESC) AS number, * FROM post) indexes WHERE indexes.number > @offset
 
 ---------------------------------------------------------------------------
 
@@ -123,3 +123,38 @@ CREATE PROCEDURE sp_comment_create
     @message varchar(MAX)
 AS
  INSERT INTO comment values (@post_id, @user_id, @message, (SELECT GETDATE()))
+ 
+ ---------------------------------------------------------------------------
+
+--Selects @amount couses from starting from @offset of @area
+--If @area isn't specified, all areas are selected
+CREATE PROCEDURE sp_filter_courses
+    @offset int,
+    @amount int,
+    @area AS varchar(30) = ''
+AS
+ IF @area <> ''
+    IF NOT EXISTS(SELECT * FROM area WHERE name = @area)
+        RAISERROR ('%d: %s', 16, 1, 100, 'Invalid area')
+    ELSE
+        SELECT TOP(@amount) * FROM (
+            SELECT ROW_NUMBER() OVER(ORDER BY name) AS number, * FROM course WHERE area_id = (SELECT id FROM area WHERE name = @area)
+        ) indexes WHERE indexes.number > @offset
+ ELSE
+    SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(ORDER BY name) AS number, * FROM course) indexes WHERE indexes.number > @offset
+    
+     
+ ---------------------------------------------------------------------------
+
+--Selects all the area names
+CREATE PROCEDURE sp_area_names
+AS
+ IF @area <> ''
+    IF NOT EXISTS(SELECT * FROM area WHERE name = @area)
+        RAISERROR ('%d: %s', 16, 1, 100, 'Invalid area')
+    ELSE
+        SELECT TOP(@amount) * FROM (
+            SELECT ROW_NUMBER() OVER(ORDER BY name) AS number, * FROM course WHERE area_id = (SELECT id FROM area WHERE name = @area)
+        ) indexes WHERE indexes.number > @offset
+ ELSE
+    SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(ORDER BY name) AS number, * FROM course) indexes WHERE indexes.number > @offset
