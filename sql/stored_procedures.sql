@@ -56,6 +56,17 @@ AS
  
 ---------------------------------------------------------------------------
 
+--Saves the settings changes
+CREATE PROCEDURE sp_save_settings
+    @id int,
+    @name varchar(30),
+    @email varchar(255),
+    @password varchar(64)
+AS
+ UPDATE [user] SET username = @name, email = @email, password = @password WHERE id = @id
+
+---------------------------------------------------------------------------
+
 --Counts the unreaden notifications from an unser
 CREATE PROCEDURE sp_unreaden_notifications
     @id int
@@ -73,3 +84,4 @@ AS
  SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(order by data) AS number, * FROM notification WHERE user_id = @id) indexes WHERE indexes.number > @offset
 
 ---------------------------------------------------------------------------
+
