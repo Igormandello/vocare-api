@@ -5,6 +5,8 @@ var app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+app.use('/api/health', require('./health'));
+
 let port = 3000
 if (process.env.PORT)
   port = process.env.PORT;
