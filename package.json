@@ -5,11 +5,14 @@
   "main": "./src/index.js",
   "devDependencies": {
     "build-express-api": "^1.2.3",
-    "nodemon": "^1.18.4"
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0",
+    "nodemon": "^1.18.4",
+    "supertest": "^3.3.0"
   },
   "scripts": {
     "start": "nodemon ./src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
