@@ -1,0 +1,4 @@
+{
+  "serverPath": "./src/index.js",
+  "controllersPath": "./src/controllers"
+}
