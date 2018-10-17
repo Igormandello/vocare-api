@@ -6,6 +6,7 @@ AS
  SELECT SUM(post.[count] + comment.[count]) AS [count] FROM
  (SELECT COUNT(*) AS [count] FROM post WHERE user_id = @user_id) post,
  (SELECT COUNT(*) AS [count] FROM comment WHERE user_id = @user_id) comment
+GO
 
  ---------------------------------------------------------------------------
 
@@ -15,7 +16,8 @@ CREATE PROCEDURE sp_user_login
 	@password varchar(64)
 AS
  SELECT * FROM [user] WHERE email = @email and password = @password
- 
+GO
+
  ---------------------------------------------------------------------------
 
 --Returns the user who have that access token
@@ -28,7 +30,8 @@ AS
         SELECT id FROM provider WHERE name = @provider
     )
  )
- 
+GO
+
 ---------------------------------------------------------------------------
 
 --Register a provider as a user media
@@ -53,7 +56,8 @@ AS
  END
  ELSE
     INSERT INTO user_login VALUES (@id, @access_token, (SELECT id AS prover_id FROM provider WHERE name = @provider))
- 
+GO
+
 ---------------------------------------------------------------------------
 
 --Saves the settings changes
@@ -64,6 +68,7 @@ CREATE PROCEDURE sp_save_settings
     @password varchar(64)
 AS
  UPDATE [user] SET username = @name, email = @email, password = @password WHERE id = @id
+GO
 
 ---------------------------------------------------------------------------
 
@@ -72,6 +77,7 @@ CREATE PROCEDURE sp_unreaden_notifications
     @id int
 AS
  SELECT COUNT(*) as amount FROM notification WHERE user_id = @id and state = 0
+GO
 
 ---------------------------------------------------------------------------
 
@@ -82,6 +88,7 @@ CREATE PROCEDURE sp_user_notifications
     @amount int
 AS
  SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(ORDER BY data) AS number, * FROM notification WHERE user_id = @id) indexes WHERE indexes.number > @offset
+GO
 
 ---------------------------------------------------------------------------
 
@@ -91,6 +98,7 @@ CREATE PROCEDURE sp_discussion_posts
     @amount int
 AS
  SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(ORDER BY posted_on DESC) AS number, * FROM post) indexes WHERE indexes.number > @offset
+GO
 
 ---------------------------------------------------------------------------
 
@@ -103,6 +111,7 @@ AS
  
  IF NOT EXISTS(SELECT * FROM post_view WHERE post_id = @id AND user_id = @user_id)
     INSERT INTO post_view values (@id, @user_id)
+GO
 
 ---------------------------------------------------------------------------
 
@@ -117,7 +126,8 @@ AS
     RAISERROR ('%d: %s', 16, 1, 100, 'Invalid area')
  ELSE
     INSERT INTO post values (@user_id, @title, @message, (SELECT GETDATE()), (SELECT id FROM area WHERE name = @area))
-    
+GO
+
 ---------------------------------------------------------------------------
 
 --Ads a tag to a post
@@ -129,6 +139,7 @@ AS
     RAISERROR ('%d: %s', 16, 1, 100, 'Invalid area')
  ELSE
     INSERT INTO post_tag values (@post_id, (SELECT id FROM tag WHERE name = @tag))
+GO
 
 ---------------------------------------------------------------------------
 
@@ -139,7 +150,8 @@ CREATE PROCEDURE sp_comment_create
     @message varchar(MAX)
 AS
  INSERT INTO comment values (@post_id, @user_id, @message, (SELECT GETDATE()))
- 
+GO
+
 ---------------------------------------------------------------------------
 
 --Selects @amount couses from starting from @offset of @area
@@ -158,7 +170,7 @@ AS
         ) indexes WHERE indexes.number > @offset
  ELSE
     SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(ORDER BY name) AS number, * FROM course) indexes WHERE indexes.number > @offset
-    
+GO
      
 ---------------------------------------------------------------------------
 
@@ -174,7 +186,8 @@ AS
         ) indexes WHERE indexes.number > @offset
  ELSE
     SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(ORDER BY name) AS number, * FROM course) indexes WHERE indexes.number > @offset
-    
+GO
+
 ---------------------------------------------------------------------------
 
 CREATE PROCEDURE sp_post_views
