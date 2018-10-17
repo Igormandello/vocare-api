@@ -13,10 +13,6 @@ cm.createContainer().then(async () => {
 	await cm.execSql(sqlScript);
 	console.log('Foreign keys created');
 
-	//console.log('\nInserting default data...');
-	//sqlScript = fs.readFileSync('./sql/hard_data.sql', 'utf8');
-	//await cm.execSql(sqlScript);
-
 	console.log('\nCreating stored procedures...');
 	sqlScript = fs.readFileSync('./sql/stored_procedures.sql', 'utf8');
 	sqlScript = sqlScript.split('GO');
@@ -26,7 +22,7 @@ cm.createContainer().then(async () => {
 		procedures.push(cm.execSql(sqlScript[i]));
 
 	await Promise.all(procedures);
-	console.log('Foreign keys created');
+	console.log('Stored procedures created');
 	
 	run();
 });

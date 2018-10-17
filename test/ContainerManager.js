@@ -76,7 +76,7 @@ function ContainerManager() {
           }).catch(() => {});
         }
         catch (e) { }
-      }, 5000);
+      }, 100);
   
       timeout = setTimeout(async () => {
         console.log('Was not able to connect to SQL container in 15000 ms. Exiting...');

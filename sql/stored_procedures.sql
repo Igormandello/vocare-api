@@ -177,15 +177,7 @@ GO
 --Selects all the area names
 CREATE PROCEDURE sp_area_names
 AS
- IF @area <> ''
-    IF NOT EXISTS(SELECT * FROM area WHERE name = @area)
-        RAISERROR ('%d: %s', 16, 1, 100, 'Invalid area')
-    ELSE
-        SELECT TOP(@amount) * FROM (
-            SELECT ROW_NUMBER() OVER(ORDER BY name) AS number, * FROM course WHERE area_id = (SELECT id FROM area WHERE name = @area)
-        ) indexes WHERE indexes.number > @offset
- ELSE
-    SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(ORDER BY name) AS number, * FROM course) indexes WHERE indexes.number > @offset
+    SELECT * FROM area
 GO
 
 ---------------------------------------------------------------------------
