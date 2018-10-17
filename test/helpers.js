@@ -1,6 +1,7 @@
-var supertest = require('supertest');
-var chai = require('chai');
-var app = require('../src/index.js');
+require('dotenv').config();
+const supertest = require('supertest');
+const chai = require('chai');
+const app = require('../src/index.js');
 
 global.app = app;
 global.expect = chai.expect;
