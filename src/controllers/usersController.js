@@ -1,7 +1,10 @@
-var router = require('express').Router();
+const router = require('express').Router();
+const { runSql } = require('../db');
 
 router.get('/', (req, res) => {
-  res.status(501).send('GET response');
+  runSql('select * from [user]').then((result) => {
+    res.send(result.recordset);
+  });
 });
 
 router.post('/', (req, res) => {
