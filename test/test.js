@@ -43,6 +43,7 @@ describe('Api health tests', () => {
 	});
 });
 
-after(() => {
-	return cm.deleteContainer()
+after(function() {
+	this.timeout(0);
+	return cm.deleteContainer();
 });
