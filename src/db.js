@@ -11,11 +11,12 @@ let db = {
     return new Promise(resolve => {
       await pool.connect();
 
-      let result = await pool.request()
-        .query(sql)
-        .catch(e => {
-          console.log(e);
-        });
+      let args = Array.prototype.slice.call(arguments, 1),
+          request = pool.request();
+      for (i = 0; i < args.length; i++)
+        request = request.input(args[i].name, args[i].type, args[i].value);
+
+      let result = await request.query(sql).catch(e => console.log(e));
 
       await pool.close();
       resolve(result);
