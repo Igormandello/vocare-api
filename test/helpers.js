@@ -1,4 +1,3 @@
-require('dotenv').config();
 const supertest = require('supertest');
 const chai = require('chai');
 const app = require('../src/index.js');
