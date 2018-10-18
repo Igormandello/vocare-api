@@ -25,9 +25,8 @@ function ContainerManager() {
   
     this.container = container;
     return new Promise((resolve, reject) => {
-      this.checkSql().then(async (connection) => {
+      this.checkSql().then(() => {
         console.log('Container booted!');
-        this.connection = connection;
         resolve();
       }).catch(() => {
         console.log('Exited');
@@ -38,7 +37,7 @@ function ContainerManager() {
 
   this.deleteContainer = function() {
     return new Promise(async resolve => {
-      await mssql.close();
+      await this.connection.close();
       await this.container.delete({ force: true });
       console.log('Container deleted!');
       resolve();
@@ -53,6 +52,14 @@ function ContainerManager() {
       });
   }
 
+  this.openConnection = function() {
+    return this.connection.connect()
+  }
+
+  this.closeConnection = function() {
+    return this.connection.close();
+  }
+
   this.checkSql = function() {
     return new Promise((resolve, reject) => {
       let timeout, interval;
@@ -64,15 +71,14 @@ function ContainerManager() {
   
           mssql.connect(`mssql://SA:${process.env.CONTAINER_PASSWORD}@localhost/tempdb`).then(async () => {
             mssql.close();
-            let connection = await new mssql
-                              .ConnectionPool(`mssql://SA:${process.env.CONTAINER_PASSWORD}@localhost/tempdb`)
-                              .connect();
+            this.connection = new mssql.ConnectionPool(`mssql://SA:${process.env.CONTAINER_PASSWORD}@localhost/tempdb`);
+            await this.openConnection(); 
 
             console.log('Connected!');
             clearInterval(interval);
             clearTimeout(timeout);
   
-            resolve(connection);
+            resolve();
           }).catch(() => {});
         }
         catch (e) { }

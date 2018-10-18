@@ -24,12 +24,19 @@ cm.createContainer().then(async () => {
 	await Promise.all(procedures);
 	console.log('Stored procedures created');
 	
+	await cm.closeConnection();
 	run();
 });
 
-beforeEach(() => {
+beforeEach(async function() {
+	this.timeout(0);
+
+	await cm.openConnection()
+
 	let deleteScript = fs.readFileSync('./sql/delete_tables.sql', 'utf8');
-	return cm.execSql(deleteScript);
+	await cm.execSql(deleteScript);
+	
+	await cm.closeConnection();
 })
 
 describe('Api health tests', () => {
