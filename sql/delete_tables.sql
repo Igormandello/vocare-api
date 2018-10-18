@@ -1,0 +1,11 @@
+DELETE FROM course
+DELETE FROM post_view
+DELETE FROM comment
+DELETE FROM post_tag
+DELETE FROM post
+DELETE FROM notification
+DELETE FROM user_login
+DELETE FROM [user]
+DELETE FROM area
+DELETE FROM tag
+DELETE FROM provider
