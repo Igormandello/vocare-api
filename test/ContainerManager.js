@@ -62,10 +62,10 @@ function ContainerManager() {
         try {
           mssql.close();
   
-          mssql.connect(`mssql://SA:${process.env.CONTAINER_PASSWORD}@localhost/master`).then(async () => {
+          mssql.connect(`mssql://SA:${process.env.CONTAINER_PASSWORD}@localhost/tempdb`).then(async () => {
             mssql.close();
             let connection = await new mssql
-                              .ConnectionPool(`mssql://SA:${process.env.CONTAINER_PASSWORD}@localhost/master`)
+                              .ConnectionPool(`mssql://SA:${process.env.CONTAINER_PASSWORD}@localhost/tempdb`)
                               .connect();
 
             console.log('Connected!');
@@ -79,11 +79,11 @@ function ContainerManager() {
       }, 100);
   
       timeout = setTimeout(async () => {
-        console.log('Was not able to connect to SQL container in 15000 ms. Exiting...');
+        console.log('Was not able to connect to SQL container in 30000 ms. Exiting...');
         await this.deleteContainer();
   
         reject();
-      }, 15000);
+      }, 30000);
     })
   }
 }
