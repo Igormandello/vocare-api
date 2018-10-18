@@ -7,7 +7,7 @@ var app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.use('/api/user', require('./src/controllers/userController'));
+app.use('/api/users', require('./controllers/usersController'));
 
 app.use('/api/health', require('./health'));
 
