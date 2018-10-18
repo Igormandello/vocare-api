@@ -12,7 +12,7 @@
   },
   "scripts": {
     "start": "nodemon ./src/index.js",
-    "test": "mocha --exit --delay"
+    "test": "NODE_ENV=test mocha --exit --delay"
   },
   "repository": {
     "type": "git",

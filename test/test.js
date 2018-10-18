@@ -30,12 +30,11 @@ cm.createContainer().then(async () => {
 
 beforeEach(async function() {
 	this.timeout(0);
-
 	await cm.openConnection()
 
 	let deleteScript = fs.readFileSync('./sql/delete_tables.sql', 'utf8');
 	await cm.execSql(deleteScript);
-	
+
 	await cm.closeConnection();
 })
 
