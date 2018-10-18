@@ -39,8 +39,8 @@ beforeEach(async function() {
 	await cm.closeConnection();
 })
 
-describe('Api health tests', () => {
-	it('should return status 200', function (done) {
+describe('Api health test', () => {
+	it('should return status 200', (done) => {
 		request.get('/api/health')
 			.expect(200)
 			.end((err, res) => {
@@ -49,6 +49,99 @@ describe('Api health tests', () => {
 			});
 	});
 });
+
+describe('Users endpoint tests', () => {
+	it('should return 0 users', (done) => {
+		request.get('/api/users')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(0);
+				done(err);
+			});
+	});
+
+	it('should insert a user with email and password and return their id, username and profile picture', (done) => {
+		request.post('/api/users')
+			.send({
+				email: 'testmail@gmail.com',
+				password: 'examplePassword',
+				username: 'user1',
+				profile_picture: null
+			})
+			.expect(201)
+			.end((err, res) => {
+				expect(res.body.id).to.equal(1);
+				expect(res.body.username).to.equal('user1');
+				expect(res.body.profile_picture).to.equal(null);
+				done(err);
+			});
+	});
+
+	it('should insert a user without email and password and return their id, username and profile picture', (done) => {
+		request.post('/api/users')
+			.send({
+				provider: 'github',
+				access_token: 'generatedAccessToken:)',
+				username: 'user2',
+				profile_picture: null
+			})
+			.expect(201)
+			.end((err, res) => {
+				expect(res.body.id).to.equal(2);
+				expect(res.body.username).to.equal('user2');
+				expect(res.body.profile_picture).to.equal(null);
+				done(err);
+			});
+	});
+
+	it('should throw an error trying to insert a user with a used email', (done) => {
+		request.post('/api/users')
+			.send({
+				email: 'testmail@gmail.com',
+				password: 'examplePassword',
+				username: 'user3',
+				profile_picture: null
+			})
+			.expect(400)
+			.end(err => done(err));
+	});
+
+	it('should return 2 users', (done) => {
+		request.get('/api/users')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(2);
+				done(err);
+			});
+	});
+
+	it('should delete an user', (done) => {
+		request.delete('/api/users')
+			.send({
+				id: 2
+			})
+			.expect(200)
+			.end(err => done(err));
+	});
+
+	it('should throw an error due to a invalid user id', (done) => {
+		request.delete('/api/users')
+			.send({
+				id: 3
+			})
+			.expect(400)
+			.end(err => done(err));
+	});
+
+	it('should return 1 users', (done) => {
+		request.get('/api/users')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(1);
+				done(err);
+			});
+	});
+})
 
 after(function() {
 	this.timeout(0);
