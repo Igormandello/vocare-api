@@ -4,7 +4,7 @@ const ContainerManager = require('./ContainerManager');
 let cm = new ContainerManager();
 cm.createContainer().then(async () => {
 	console.log('\nCreating tables...');
-	let sqlScript = fs.readFileSync('./sql/bd.sql', 'utf8');
+	let sqlScript = fs.readFileSync('./sql/create_tables.sql', 'utf8');
 	await cm.execSql(sqlScript);
 	console.log('Tables created');
 
@@ -26,6 +26,11 @@ cm.createContainer().then(async () => {
 	
 	run();
 });
+
+beforeEach(() => {
+	let deleteScript = fs.readFileSync('./sql/delete_tables.sql', 'utf8');
+	return cm.execSql(deleteScript);
+})
 
 describe('Api health tests', () => {
 	it('should return status 200', function (done) {
