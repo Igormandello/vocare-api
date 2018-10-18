@@ -4,7 +4,6 @@
   "version": "1.0.0",
   "main": "./src/index.js",
   "devDependencies": {
-    "build-express-api": "^1.2.3",
     "chai": "^4.2.0",
     "mocha": "^5.2.0",
     "nodemon": "^1.18.4",
