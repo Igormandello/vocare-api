@@ -171,20 +171,14 @@ describe('Users endpoint tests', () => {
 			});
 	});
 
-	it('should delete an user', (done) => {
-		request.delete('/api/users')
-			.send({
-				id: 2
-			})
+	it('should delete the user with id 2', (done) => {
+		request.delete('/api/users/2')
 			.expect(200)
 			.end(err => done(err));
 	});
 
 	it('should throw an error due to a invalid user id', (done) => {
-		request.delete('/api/users')
-			.send({
-				id: 3
-			})
+		request.delete('/api/users/3')
 			.expect(400)
 			.end(err => done(err));
 	});
