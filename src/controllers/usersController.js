@@ -15,6 +15,19 @@ router.get('/', (req, res) => {
   });
 });
 
+router.get('/:id', (req, res) => {
+  runSql('select * from [user] where id = @id',
+    { name: 'id', type: mssql.Int, value: req.params.id }
+  ).then((result) => {
+    let obj = result.recordset[0];
+    res.send({
+      id: obj.id,
+      username: obj.username,
+      profile_picture: obj.profile_picture
+    });
+  });
+});
+
 router.post('/', (req, res) => {
   if (req.body.email && req.body.password)
     runSql('exec sp_register_user @email, @password, @username',
