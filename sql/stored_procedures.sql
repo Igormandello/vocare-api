@@ -52,10 +52,29 @@ AS
  IF @id <= 0
  BEGIN
     INSERT INTO [user] VALUES (NULL, NULL, @username, 1, NULL)
-    INSERT INTO user_login VALUES ((SELECT MAX(id) AS user_id FROM [user]), @access_token, (SELECT id as prover_id FROM provider WHERE name = @provider))
+    INSERT INTO user_login VALUES ((SELECT MAX(id) AS user_id FROM [user]), @access_token, (SELECT id as provider_id FROM provider WHERE name = @provider))
+    SELECT * FROM [user] WHERE id = (SELECT MAX(id) FROM [user])
  END
  ELSE
-    INSERT INTO user_login VALUES (@id, @access_token, (SELECT id AS prover_id FROM provider WHERE name = @provider))
+    INSERT INTO user_login VALUES (@id, @access_token, (SELECT id AS provider_id FROM provider WHERE name = @provider))
+GO
+
+---------------------------------------------------------------------------
+
+--Register a new user
+CREATE PROCEDURE sp_register_user
+	@email varchar(255),
+	@password varchar(64),
+	@username varchar(30)
+AS
+ IF EXISTS(SELECT * FROM [user] WHERE email = @email)
+ BEGIN
+    RAISERROR ('%d: %s', 16, 1, 100, 'This email is already registered')
+    RETURN
+ END
+    
+ INSERT INTO [user] VALUES (@email, @password, @username, 1, NULL)
+ SELECT * FROM [user] WHERE id = (SELECT MAX(id) FROM [user]) 
 GO
 
 ---------------------------------------------------------------------------
