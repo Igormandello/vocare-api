@@ -34,6 +34,28 @@ GO
 
 ---------------------------------------------------------------------------
 
+--Mofidies the user in database
+CREATE PROCEDURE sp_update_user
+    @id int,
+	@email varchar(255),
+	@password varchar(64),
+    @username varchar(30),
+    @profile_picture varbinary(max)
+AS
+ IF EXISTS(SELECT * FROM [user] WHERE email = @email and id <> @id)
+ BEGIN
+    RAISERROR ('%d: %s', 16, 1, 100, 'This email is already in use')
+    RETURN
+ END
+
+ UPDATE [user] set email = @email, password = @password, username = @username, profile_picture = @profile_picture
+ WHERE id = @id
+
+ SELECT * FROM [user] WHERE id = @id
+GO
+
+---------------------------------------------------------------------------
+
 --Register a provider as a user media
 CREATE PROCEDURE sp_register_user_media
 	@provider varchar(50),
