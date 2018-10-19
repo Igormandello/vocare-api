@@ -276,6 +276,163 @@ describe('User messages tests', () => {
 				done(err);
 			});
 	});
+});
+
+describe('Posts endpoint tests', () => {
+	before(async function() {
+		this.timeout(0);
+
+		await deleteData();
+		await cm.openConnection();
+		await cm.execSql('exec sp_register_user \'email@gmail.com\', \'password\', \'user1\'');
+		await cm.execSql('INSERT INTO area VALUES (\'Valid Area 1\')');
+		await cm.execSql('INSERT INTO area VALUES (\'Valid Area 2\')');
+		await cm.closeConnection();
+	});
+
+	it('should return 0 posts', (done) => {
+		request.get('/api/posts')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(0);
+				done(err);
+			});
+	});
+
+	it('should create a post with the area "Valid Area 1" and return it\'s id and it\'s area_id', (done) => {
+		request.post('/api/posts')
+			.send({
+				user_id: 1,
+				title: 'post title 1',
+				message: 'post message',
+				area: 'Valid Area 1'
+			})
+			.expect(201)
+			.end((err, res) => {
+				expect(res.body.id).to.equal(1);
+				expect(res.body.area_id).to.equal(1);
+				done(err);
+			});
+	});
+
+	it('should create a post with the area "Valid Area 2" and return it\'s id and it\'s area_id', (done) => {
+		request.post('/api/posts')
+			.send({
+				user_id: 1,
+				title: 'post title 2',
+				message: 'post message',
+				area: 'Valid Area 2'
+			})
+			.expect(201)
+			.end((err, res) => {
+				expect(res.body.id).to.equal(2);
+				expect(res.body.area_id).to.equal(2);
+				done(err);
+			});
+	});
+
+	it('should throw an error trying to create a post with an invalid area', (done) => {
+		request.post('/api/posts')
+			.send({
+				user_id: 1,
+				title: 'post title',
+				message: 'post message',
+				area: 'invalid area'
+			})
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should return 2 posts', (done) => {
+		request.get('/api/posts')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(2);
+				done(err);
+			});
+	});
+
+	it('should return the post with id 1, which have title "post title 1" and 0 comments', (done) => {
+		request.get('/api/posts/1')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.id).to.equal(1);
+				expect(res.body.title.length).to.equal('post title 1');
+				expect(res.body.comments.length).to.equal(0);
+				done(err);
+			});
+	});
+
+	it('should update the post title of post with id 1 to "new post title"', (done) => {
+		request.put('/api/posts/1')
+			.send({
+				title: 'new post title',
+				message: 'new post message',
+				area: 'Valid Area 1'
+			})
+			.expect(200)
+			.end((err, res) => done(err));
+	});
+
+	it('should throw an error trying to update a post to an invalid area', (done) => {
+		request.put('/api/posts/1')
+			.send({
+				title: 'post title',
+				message: 'post message',
+				area: 'invalid area'
+			})
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should throw an error trying to update an invalid post', (done) => {
+		request.put('/api/posts/3')
+			.send({
+				title: 'new post title',
+				message: 'new post message',
+				area: 'Valid Area 1'
+			})
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should return the post with id 1, which now have title "new post title" and 0 comments', (done) => {
+		request.get('/api/posts/1')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.id).to.equal(1);
+				expect(res.body.title.length).to.equal('new post title');
+				expect(res.body.comments.length).to.equal(0);
+				done(err);
+			});
+	});
+
+	it('should throw an error trying to get an invalid post', (done) => {
+		request.get('/api/posts/3')
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should delete the post with id 1', (done) => {
+		request.delete('/api/posts/1')
+			.expect(200)
+			.end((err, res) => done(err));
+	});
+
+	it('should throw an error trying to delete an invalid post', (done) => {
+		request.delete('/api/posts/1')
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should return 1 post', (done) => {
+		request.get('/api/posts')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(1);
+				done(err);
+			});
+	});
 })
 
 after(function() {
