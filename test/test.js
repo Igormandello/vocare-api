@@ -162,6 +162,12 @@ describe('Users endpoint tests', () => {
 			});
 	});
 
+	it('should throw an error trying to get an inexistent user id', (done) => {
+		request.get('/api/users/3')
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
 	it('should return 2 users', (done) => {
 		request.get('/api/users')
 			.expect(200)

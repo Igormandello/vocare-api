@@ -19,6 +19,11 @@ router.get('/:id', (req, res) => {
   runSql('exec sp_users @id',
     { name: 'id', type: mssql.Int, value: req.params.id }
   ).then((result) => {
+    if (result.recordset.length == 0) {
+      res.status(400).send();
+      return;
+    }
+
     let obj = result.recordset[0];
     res.send({
       id: obj.id,
