@@ -28,15 +28,17 @@ cm.createContainer().then(async () => {
 	run();
 });
 
-beforeEach(async function() {
-	this.timeout(0);
-	await cm.openConnection()
+deleteData = async function() {
+	return new Promise(async resolve => {
+		await cm.openConnection()
 
-	let deleteScript = fs.readFileSync('./sql/delete_tables.sql', 'utf8');
-	await cm.execSql(deleteScript);
+		let deleteScript = fs.readFileSync('./sql/delete_tables.sql', 'utf8');
+		await cm.execSql(deleteScript);
 
-	await cm.closeConnection();
-})
+		await cm.closeConnection();
+		resolve();
+	});
+}
 
 describe('Api health test', () => {
 	it('should return status 200', (done) => {
@@ -50,6 +52,15 @@ describe('Api health test', () => {
 });
 
 describe('Users endpoint tests', () => {
+	before(async function() {
+		this.timeout(0);
+
+		await deleteData();
+		await cm.openConnection()
+		await cm.execSql('INSERT INTO provider VALUES (\'github\')');
+		await cm.closeConnection();
+	})
+
 	it('should return 0 users', (done) => {
 		request.get('/api/users')
 			.expect(200)
