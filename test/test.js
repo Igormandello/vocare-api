@@ -59,7 +59,7 @@ describe('Users endpoint tests', () => {
 		await cm.openConnection()
 		await cm.execSql('INSERT INTO provider VALUES (\'github\')');
 		await cm.closeConnection();
-	})
+	});
 
 	it('should return 0 users', (done) => {
 		request.get('/api/users')
@@ -247,30 +247,36 @@ describe('Users endpoint tests', () => {
 				done(err);
 			});
 	});
+});
+
+describe('User messages tests', () => {
+	before(async function() {
+		this.timeout(0);
+
+		await cm.openConnection()
+		await cm.execSql('INSERT INTO area VALUES (\'Exatas\')');
+		await cm.execSql('INSERT INTO post VALUES (2, \'a\', \'b\', \'08-20-2018 12:15:00\', 1)');
+		await cm.closeConnection();
+	});
 
 	it('should return 0 (this user has no messages)', (done) => {
 		request.get('/api/users/1/messages')
 			.expect(200)
 			.end((err, res) => {
-				expect(res.body).to.equal(0);
+				expect(res.body.count).to.equal(0);
 				done(err);
 			});
 	});
 
-	it('should return 1 (this user has one message)', async (done) => {
-		await cm.openConnection()
-		await cm.execSql('INSERT INTO area VALUES (\'Exatas\')');
-		await cm.execSql('INSERT INTO post VALUES (2, \'a\', \'b\', \'08-20-2018 12:15:00\', 1)');
-		await cm.closeConnection();
-
+	it('should return 1 (this user has one message)', (done) => {
 		request.get('/api/users/2/messages')
 			.expect(200)
 			.end((err, res) => {
-				expect(res.body).to.equal(1);
+				expect(res.body.count).to.equal(1);
 				done(err);
 			});
 	});
-});
+})
 
 after(function() {
 	this.timeout(0);

@@ -33,6 +33,12 @@ router.get('/:id(\\d+)', (req, res) => {
   });
 });
 
+router.get('/:id(\\d+)/messages', (req, res) => {
+  runSql('exec sp_count_messages @id',
+    { name: 'id', type: mssql.Int, value: req.params.id }
+  ).then(result => res.send(result.recordset[0]));
+});
+
 router.get('/login', (req, res) => {
   if (req.body.email && req.body.password)
     runSql('exec sp_user_login @email, @password',
