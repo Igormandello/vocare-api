@@ -15,7 +15,7 @@ router.get('/', (req, res) => {
   });
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id(\\d+)', (req, res) => {
   runSql('exec sp_users @id',
     { name: 'id', type: mssql.Int, value: req.params.id }
   ).then((result) => {
@@ -47,7 +47,7 @@ router.post('/', (req, res) => {
         profile_picture: result.profile_picture
       });
     }).catch(e => res.status(400).send(e));
-  else 
+  else
     runSql('exec sp_register_user_media @provider, @access_token, -1, @username',
       { name: 'provider', type: mssql.VarChar(50), value: req.body.provider },
       { name: 'access_token', type: mssql.VarChar(mssql.MAX), value: req.body.access_token },
@@ -62,7 +62,7 @@ router.post('/', (req, res) => {
     }).catch(e => res.status(400).send(e));
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id(\\d+)', (req, res) => {
   runSql('exec sp_update_user @id, @email, @password, @username, @profile_picture',
     { name: 'id', type: mssql.Int, value: req.params.id },
     { name: 'email', type: mssql.VarChar(255), value: req.body.email },
@@ -73,7 +73,7 @@ router.put('/:id', (req, res) => {
   .catch(e => res.status(400).send(e));
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id(\\d+)', (req, res) => {
   runSql('exec sp_delete_user @id',
     { name: 'id', type: mssql.Int, value: req.params.id }
   ).then(() => res.status(200).send())
