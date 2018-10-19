@@ -68,8 +68,11 @@ router.put('/:id', (req, res) => {
   .catch(e => res.status(400).send(e));
 });
 
-router.delete('/', (req, res) => {
-  res.status(501).send('DELETE response');
+router.delete('/:id', (req, res) => {
+  runSql('exec sp_delete_user @id',
+    { name: 'id', type: mssql.Int, value: req.params.id }
+  ).then(() => res.status(200).send())
+  .catch(e => res.status(400).send(e));
 });
 
 module.exports = router;
