@@ -116,6 +116,52 @@ describe('Users endpoint tests', () => {
 			.end(err => done(err));
 	});
 
+	it('should return the user with the id 1 and user name "user1"', (done) => {
+		request.get('/api/users/1')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.id).to.equal(1);
+				expect(res.body.username).to.equal('user1');
+				expect(res.body.profile_picture).to.equal(null);
+				done(err);
+			});
+	});
+
+	it('should change the data from user with id 1', (done) => {
+		request.put('/api/users/1')
+			.send({
+				email: 'newtestmail@gmail.com',
+				password: 'newExamplePassword',
+				username: 'newuser1',
+				profile_picture: null
+			})
+			.expect(200)
+			.end((err, res) => done(err));
+	});
+
+	it('should throw an error trying to update the user with id 1 because the email already exists', (done) => {
+		request.put('/api/users/1')
+			.send({
+				email: 'newtestmail@gmail.com',
+				password: 'newExamplePassword',
+				username: 'newuser1',
+				profile_picture: null
+			})
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should return the user with id 1, now with the username equals to "newuser1"', (done) => {
+		request.get('/api/users/1')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.id).to.equal(1);
+				expect(res.body.username).to.equal('newuser1');
+				expect(res.body.profile_picture).to.equal(null);
+				done(err);
+			});
+	});
+
 	it('should return 2 users', (done) => {
 		request.get('/api/users')
 			.expect(200)

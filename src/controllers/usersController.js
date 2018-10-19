@@ -5,7 +5,13 @@ const { runSql } = require('../db');
 
 router.get('/', (req, res) => {
   runSql('select * from [user]').then((result) => {
-    res.send(result.recordset);
+    res.send(result.recordset.map(obj => {
+      return {
+        id: obj.id,
+        username: obj.username,
+        profile_picture: obj.profile_picture
+      }
+    }));
   });
 });
 
