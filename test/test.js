@@ -139,12 +139,12 @@ describe('Users endpoint tests', () => {
 			.end((err, res) => done(err));
 	});
 
-	it('should throw an error trying to update the user with id 1 because the email already exists', (done) => {
-		request.put('/api/users/1')
+	it('should throw an error trying to update the user with id 2 because the email already exists', (done) => {
+		request.put('/api/users/2')
 			.send({
 				email: 'newtestmail@gmail.com',
 				password: 'newExamplePassword',
-				username: 'newuser1',
+				username: 'newuser2',
 				profile_picture: null
 			})
 			.expect(400)

@@ -57,8 +57,15 @@ router.post('/', (req, res) => {
     }).catch(e => res.status(400).send(e));
 });
 
-router.put('/', (req, res) => {
-  res.status(501).send('PUT response');
+router.put('/:id', (req, res) => {
+  runSql('exec sp_update_user @id, @email, @password, @username, @profile_picture',
+    { name: 'id', type: mssql.Int, value: req.params.id },
+    { name: 'email', type: mssql.VarChar(255), value: req.body.email },
+    { name: 'password', type: mssql.VarChar(64), value: sha256(req.body.password) },
+    { name: 'username', type: mssql.VarChar(30), value: req.body.username },
+    { name: 'profile_picture', type: mssql.VarBinary(mssql.MAX), value: req.body.profile_picture }
+  ).then(() => res.status(200).send())
+  .catch(e => res.status(400).send(e));
 });
 
 router.delete('/', (req, res) => {
