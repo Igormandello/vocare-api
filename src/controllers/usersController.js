@@ -4,7 +4,7 @@ const mssql = require('mssql');
 const { runSql } = require('../db');
 
 router.get('/', (req, res) => {
-  runSql('select * from [user]').then((result) => {
+  runSql('exec sp_users').then((result) => {
     res.send(result.recordset.map(obj => {
       return {
         id: obj.id,
@@ -16,7 +16,7 @@ router.get('/', (req, res) => {
 });
 
 router.get('/:id', (req, res) => {
-  runSql('select * from [user] where id = @id',
+  runSql('exec sp_users @id',
     { name: 'id', type: mssql.Int, value: req.params.id }
   ).then((result) => {
     let obj = result.recordset[0];
