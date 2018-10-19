@@ -104,7 +104,7 @@ describe('Users endpoint tests', () => {
 			});
 	});
 
-	it('should throw an error trying to insert a user with a used email', (done) => {
+	it('should throw an error trying to insert a user with an used email', (done) => {
 		request.post('/api/users')
 			.send({
 				email: 'testmail@gmail.com',
@@ -143,7 +143,7 @@ describe('Users endpoint tests', () => {
 			.end(err => done(err));
 	});
 
-	it('should return 1 users', (done) => {
+	it('should return 1 user', (done) => {
 		request.get('/api/users')
 			.expect(200)
 			.end((err, res) => {
