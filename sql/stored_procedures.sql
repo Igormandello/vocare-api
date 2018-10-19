@@ -56,6 +56,23 @@ GO
 
 ---------------------------------------------------------------------------
 
+--Deletes the suer from database
+CREATE PROCEDURE sp_delete_user
+    @id int
+AS
+ IF NOT EXISTS(SELECT * FROM [user] WHERE id = @id)
+ BEGIN
+    RAISERROR ('%d: %s', 16, 1, 100, 'This user id does not exist')
+    RETURN
+ END
+
+ DELETE FROM notification WHERE user_id = @id
+ DELETE FROM user_login WHERE user_id = @id
+ UPDATE [user] set email = NULL, password = NULL, username = 'Usuário deletado', profile_picture = NULL, deleted = 1 WHERE id = @id
+GO
+
+---------------------------------------------------------------------------
+
 --Register a provider as a user media
 CREATE PROCEDURE sp_register_user_media
 	@provider varchar(50),
@@ -219,6 +236,18 @@ GO
 CREATE PROCEDURE sp_area_names
 AS
     SELECT * FROM area
+GO
+
+---------------------------------------------------------------------------
+
+--Selects all the users names
+CREATE PROCEDURE sp_users
+    @id AS int = 0
+AS
+ IF @id <= 0
+    SELECT * FROM [user] where deleted = 0
+ ELSE
+    SELECT * FROM [user] where id = @id and deleted = 0
 GO
 
 ---------------------------------------------------------------------------
