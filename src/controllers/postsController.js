@@ -4,15 +4,19 @@ router.get('/', (req, res) => {
   res.status(501).send('GET response');
 });
 
+router.get('/:id(\\d+)', (req, res) => {
+  res.status(501).send('GET response');
+});
+
 router.post('/', (req, res) => {
   res.status(501).send('POST response');
 });
 
-router.put('/', (req, res) => {
+router.put('/:id(\\d+)', (req, res) => {
   res.status(501).send('PUT response');
 });
 
-router.delete('/', (req, res) => {
+router.delete('/:id(\\d+)', (req, res) => {
   res.status(501).send('DELETE response');
 });
 
