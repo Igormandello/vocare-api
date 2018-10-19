@@ -7,19 +7,23 @@ else
   pool = new mssql.ConnectionPool(`mssql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_SERVER}/${process.env.DB}`);
 
 let db = {
-  runSql: function(sql) {
-    return new Promise(async resolve => {
+  runSql: function(sql, /**/) {
+    let args = Array.prototype.slice.call(arguments, 1);
+
+    return new Promise(async (resolve, reject) => {
       await pool.connect();
 
-      let args = Array.prototype.slice.call(arguments, 1),
-          request = pool.request();
+      let request = pool.request();
       for (i = 0; i < args.length; i++)
         request = request.input(args[i].name, args[i].type, args[i].value);
 
-      let result = await request.query(sql).catch(e => console.log(e));
-
-      await pool.close();
-      resolve(result);
+      try {
+        resolve(await request.query(sql));
+      } catch (e) {
+        reject(e);
+      } finally {
+        pool.close();
+      }
     })
   }
 }
