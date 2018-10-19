@@ -15,7 +15,7 @@ CREATE PROCEDURE sp_user_login
 	@email varchar(255),
 	@password varchar(64)
 AS
- SELECT * FROM [user] WHERE email = @email and password = @password
+ SELECT * FROM [user] WHERE email = @email and password = @password and deleted = 0
 GO
 
  ---------------------------------------------------------------------------
@@ -73,7 +73,7 @@ AS
     
  IF @id <= 0
  BEGIN
-    INSERT INTO [user] VALUES (NULL, NULL, @username, 1, NULL)
+    INSERT INTO [user] VALUES (NULL, NULL, @username, 1, NULL, 0)
     INSERT INTO user_login VALUES ((SELECT MAX(id) AS user_id FROM [user]), @access_token, (SELECT id as provider_id FROM provider WHERE name = @provider))
     SELECT * FROM [user] WHERE id = (SELECT MAX(id) FROM [user])
  END
@@ -95,7 +95,7 @@ AS
     RETURN
  END
     
- INSERT INTO [user] VALUES (@email, @password, @username, 1, NULL)
+ INSERT INTO [user] VALUES (@email, @password, @username, 1, NULL, 0)
  SELECT * FROM [user] WHERE id = (SELECT MAX(id) FROM [user]) 
 GO
 

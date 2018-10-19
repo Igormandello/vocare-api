@@ -47,7 +47,8 @@ CREATE TABLE [user] (
   [password] varchar(64) NULL,
   [username] varchar(30) NOT NULL,
   [level] int NOT NULL,
-  [profile_picture] varbinary(max) NULL
+  [profile_picture] varbinary(max) NULL,
+  [deleted] bit NOT NULL
 );
 
 CREATE TABLE [user_login] (
