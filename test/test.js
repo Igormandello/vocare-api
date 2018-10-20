@@ -434,6 +434,18 @@ describe('Posts endpoint tests', () => {
 				done(err);
 			});
 	});
+
+	it('should return 0 posts in the second page of posts', (done) => {
+		request.get('/api/posts')
+			.send({
+				page: 1,
+			})
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(0);
+				done(err);
+			});
+	});
 });
 
 describe('Post views tests', () => {
