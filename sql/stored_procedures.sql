@@ -181,9 +181,13 @@ CREATE PROCEDURE sp_post_create
     @area varchar(30)
 AS
  IF NOT EXISTS(SELECT * FROM area WHERE name = @area)
+ BEGIN
     RAISERROR ('%d: %s', 16, 1, 100, 'Invalid area')
- ELSE
-    INSERT INTO post values (@user_id, @title, @message, (SELECT GETDATE()), (SELECT id FROM area WHERE name = @area))
+    RETURN
+ END
+
+ INSERT INTO post values (@user_id, @title, @message, (SELECT GETDATE()), (SELECT id FROM area WHERE name = @area))
+ SELECT * FROM post WHERE id = (SELECT MAX(id) FROM post)
 GO
 
 ---------------------------------------------------------------------------
