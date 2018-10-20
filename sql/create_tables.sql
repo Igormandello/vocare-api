@@ -20,8 +20,8 @@ CREATE TABLE [course] (
 );
 
 CREATE TABLE [post_view] (
-  [user_id] int NOT NULL,
-  [post_id] int NOT NULL
+  [post_id] int NOT NULL,
+  [user_id] int NOT NULL
 );
 
 CREATE TABLE [post] (

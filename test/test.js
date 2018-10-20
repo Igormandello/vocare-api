@@ -284,6 +284,7 @@ describe('Posts endpoint tests', () => {
 
 		await deleteData();
 		await cm.openConnection();
+		await cm.execSql('DBCC CHECKIDENT(\'user\', RESEED, 0)');
 		await cm.execSql('exec sp_register_user \'email@gmail.com\', \'password\', \'user1\'');
 		await cm.execSql('INSERT INTO area VALUES (\'Valid Area 1\')');
 		await cm.execSql('INSERT INTO area VALUES (\'Valid Area 2\')');
@@ -441,7 +442,7 @@ describe('Post views tests', () => {
 
 		await cm.openConnection();
 		await cm.execSql('exec sp_post_create 1, \'post title\', \'post message\', \'Valid Area 1\'');
-		await cm.execSql('INSERT INTO post_view values (3, 1)');
+		await cm.execSql('INSERT INTO post_view values (2, 1)');
 		await cm.closeConnection();
 	});
 
