@@ -285,6 +285,8 @@ describe('Posts endpoint tests', () => {
 		await deleteData();
 		await cm.openConnection();
 		await cm.execSql('DBCC CHECKIDENT(\'user\', RESEED, 0)');
+		await cm.execSql('DBCC CHECKIDENT(\'area\', RESEED, 0)');
+		await cm.execSql('DBCC CHECKIDENT(\'post\', RESEED, 0)');
 		await cm.execSql('exec sp_register_user \'email@gmail.com\', \'password\', \'user1\'');
 		await cm.execSql('INSERT INTO area VALUES (\'Valid Area 1\')');
 		await cm.execSql('INSERT INTO area VALUES (\'Valid Area 2\')');
@@ -300,7 +302,7 @@ describe('Posts endpoint tests', () => {
 			});
 	});
 
-	it('should create a post with the area "Valid Area 1" and return it\'s id and it\'s area_id', (done) => {
+	it('should create a post with the area "Valid Area 1" and return its id and its area_id', (done) => {
 		request.post('/api/posts')
 			.send({
 				user_id: 1,
@@ -316,7 +318,7 @@ describe('Posts endpoint tests', () => {
 			});
 	});
 
-	it('should create a post with the area "Valid Area 2" and return it\'s id and it\'s area_id', (done) => {
+	it('should create a post with the area "Valid Area 2" and return its id and its area_id', (done) => {
 		request.post('/api/posts')
 			.send({
 				user_id: 1,
