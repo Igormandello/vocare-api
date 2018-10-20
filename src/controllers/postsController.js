@@ -1,7 +1,14 @@
 const router = require('express').Router();
+const { runSql } = require('../db');
 
 router.get('/', (req, res) => {
-  res.status(501).send('GET response');
+  let offset = 0;
+  if (req.body.page && req.body.page > 0)
+    offset = 10 * page;
+
+  runSql(`exec sp_discussion_posts ${offset}, 10`).then(result => {
+    res.send(result.recordset);
+  }).catch(e => res.status(400).send(e));
 });
 
 router.get('/:id(\\d+)', (req, res) => {
