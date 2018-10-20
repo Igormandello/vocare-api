@@ -8,6 +8,10 @@ router.get('/:id(\\d+)', (req, res) => {
   res.status(501).send('GET response');
 });
 
+router.get('/:id(\\d+)/views', (req, res) => {
+  res.status(501).send('GET response');
+});
+
 router.post('/', (req, res) => {
   res.status(501).send('POST response');
 });

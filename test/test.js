@@ -433,7 +433,42 @@ describe('Posts endpoint tests', () => {
 				done(err);
 			});
 	});
-})
+});
+
+describe('Post views tests', () => {
+	before(async function() {
+		this.timeout(0);
+
+		await cm.openConnection();
+		await cm.execSql('exec sp_post_create 1, \'post title\', \'post message\', \'Valid Area 1\'');
+		await cm.execSql('INSERT INTO post_view values (3, 1)');
+		await cm.closeConnection();
+	});
+
+	it('should throw an error trying to access the views number of an unexistent post', (done) => {
+		request.get('/api/posts/3/views')
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should return 0 views in the post 2', (done) => {
+		request.get('/api/posts/2/views')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.views).to.equal(0);
+				done(err);
+			});
+	});
+
+	it('should return 1 view in the post 3', (done) => {
+		request.get('/api/posts/3/views')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.views).to.equal(0);
+				done(err);
+			});
+	});
+});
 
 after(function() {
 	this.timeout(0);
