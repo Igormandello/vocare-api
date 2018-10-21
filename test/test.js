@@ -139,6 +139,18 @@ describe('Users endpoint tests', () => {
 			.end((err, res) => done(err));
 	});
 
+	it('should throw an error trying to update an nonexistent user', (done) => {
+		request.put('/api/users/3')
+			.send({
+				email: 'newtestmail2@gmail.com',
+				password: 'newExamplePassword',
+				username: 'newuser3',
+				profile_picture: null
+			})
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
 	it('should throw an error trying to update the user with id 2 because the email already exists', (done) => {
 		request.put('/api/users/2')
 			.send({
@@ -458,7 +470,7 @@ describe('Post views tests', () => {
 		await cm.closeConnection();
 	});
 
-	it('should throw an error trying to access the views number of an unexistent post', (done) => {
+	it('should throw an error trying to access the views number of an nonexistent post', (done) => {
 		request.get('/api/posts/3/views')
 			.expect(400)
 			.end((err, res) => done(err));

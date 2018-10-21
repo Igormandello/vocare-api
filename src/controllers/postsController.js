@@ -45,7 +45,13 @@ router.post('/', (req, res) => {
 });
 
 router.put('/:id(\\d+)', (req, res) => {
-  res.status(501).send('PUT response');
+  runSql('exec sp_edit_post @id, @title, @message, @area',
+    { name: 'id', type: mssql.Int, value: req.params.id },
+    { name: 'title', type: mssql.VarChar(100), value: req.body.title },
+    { name: 'message', type: mssql.VarChar(mssql.MAX), value: req.body.message },
+    { name: 'area', type: mssql.VarChar(30), value: req.body.area },
+  ).then(() => res.status(200).send())
+  .catch(e => res.status(400).send(e));
 });
 
 router.delete('/:id(\\d+)', (req, res) => {
