@@ -38,6 +38,13 @@ router.get('/:id(\\d+)/views', (req, res) => {
   }).catch((e) => res.status(400).send(e));
 });
 
+router.get('/:id(\\d+)/tags', (req, res) => {
+  runSql('exec sp_post_tags @id',
+    { name: 'id', type: mssql.Int, value: req.params.id }
+  ).then((result) => res.send(result.recordset.map(obj => obj.name)))
+  .catch((e) => res.status(400).send(e));
+});
+
 router.post('/', (req, res) => {
   runSql('exec sp_post_create @user_id, @title, @message, @area',
     { name: 'user_id', type: mssql.Int, value: req.body.user_id },
@@ -51,6 +58,27 @@ router.post('/', (req, res) => {
       area_id: obj.area_id
     });
   }).catch((e) => res.status(400).send(e));
+});
+
+router.post('/:id(\\d+)/tags', async (req, res) => {
+  if (Array.isArray(req.body.tags)) {
+    let error = false;
+    for (let i = 0; i < req.body.tags.length && !error; i++)
+      await runSql('exec sp_add_tag @id, @tag', 
+        { name: 'id', type: mssql.Int, value: req.params.id },
+        { name: 'tag', type: mssql.VarChar(30), value: req.body.tags[i] }
+      ).catch((e) => { error = true; res.status(400).send(e); });
+
+    if (!error)
+      res.status(201).send();
+  } else if (req.body.tags)
+    runSql('exec sp_add_tag @id, @tag',
+      { name: 'id', type: mssql.Int, value: req.params.id },
+      { name: 'tag', type: mssql.VarChar(30), value: req.body.tags }
+    ).then(() => res.status(201).send())
+    .catch((e) => res.status(400).send(e));
+  else
+    res.status(400).send();
 });
 
 router.put('/:id(\\d+)', (req, res) => {
@@ -68,6 +96,27 @@ router.delete('/:id(\\d+)', (req, res) => {
     { name: 'id', type: mssql.Int, value: req.params.id }
   ).then(() => res.status(200).send())
   .catch(e => res.status(400).send(e));
+});
+
+router.delete('/:id(\\d+)/tags', async (req, res) => {
+  if (Array.isArray(req.body.tags)) {
+    let error = false;
+    for (let i = 0; i < req.body.tags.length && !error; i++)
+      await runSql('exec sp_remove_tag @id, @tag', 
+        { name: 'id', type: mssql.Int, value: req.params.id },
+        { name: 'tag', type: mssql.VarChar(30), value: req.body.tags[i] }
+      ).catch((e) => { error = true; res.status(400).send(e); });
+
+    if (!error)
+      res.status(200).send();
+  } else if (req.body.tags)
+    runSql('exec sp_remove_tag @id, @tag',
+      { name: 'id', type: mssql.Int, value: req.params.id },
+      { name: 'tag', type: mssql.VarChar(30), value: req.body.tags }
+    ).then(() => res.status(200).send())
+    .catch((e) => res.status(400).send(e));
+  else
+    res.status(400).send();
 });
 
 module.exports = router;
