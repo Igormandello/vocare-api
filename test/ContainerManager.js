@@ -53,7 +53,7 @@ function ContainerManager() {
   }
 
   this.openConnection = function() {
-    return this.connection.connect()
+    return this.connection.connect();
   }
 
   this.closeConnection = function() {

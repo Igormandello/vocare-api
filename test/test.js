@@ -466,12 +466,12 @@ describe('Post views tests', () => {
 
 		await cm.openConnection();
 		await cm.execSql('exec sp_post_create 1, \'post title\', \'post message\', \'Valid Area 1\'');
-		await cm.execSql('INSERT INTO post_view values (2, 1)');
+		await cm.execSql('INSERT INTO post_view values (3, 1)');
 		await cm.closeConnection();
 	});
 
 	it('should throw an error trying to access the views number of an nonexistent post', (done) => {
-		request.get('/api/posts/3/views')
+		request.get('/api/posts/4/views')
 			.expect(400)
 			.end((err, res) => done(err));
 	});
@@ -489,7 +489,7 @@ describe('Post views tests', () => {
 		request.get('/api/posts/3/views')
 			.expect(200)
 			.end((err, res) => {
-				expect(res.body.views).to.equal(0);
+				expect(res.body.views).to.equal(1);
 				done(err);
 			});
 	});
