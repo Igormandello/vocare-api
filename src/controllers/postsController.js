@@ -13,7 +13,16 @@ router.get('/', (req, res) => {
 });
 
 router.get('/:id(\\d+)', (req, res) => {
-  res.status(501).send('GET response');
+  runSql('exec sp_discussion_posts 0, 0, @id',
+    { name: 'id', type: mssql.Int, value: req.params.id }
+  ).then((result) => {
+    if (result.recordset.length == 0) {
+      res.status(400).send();
+      return;
+    }
+
+    res.send(result.recordset[0]);
+  });
 });
 
 router.get('/:id(\\d+)/views', (req, res) => {
