@@ -42,6 +42,12 @@ CREATE PROCEDURE sp_update_user
     @username varchar(30),
     @profile_picture varbinary(max)
 AS
+ IF NOT EXISTS(SELECT * FROM [user] WHERE id = @id)
+ BEGIN
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid user')
+    RETURN
+ END
+
  IF EXISTS(SELECT * FROM [user] WHERE email = @email and id <> @id)
  BEGIN
     RAISERROR ('%d: %s', 16, 1, 100, 'This email is already in use')
@@ -172,6 +178,12 @@ CREATE PROCEDURE sp_edit_post
     @newMessage varchar(MAX),
     @newArea varchar(30)
 AS
+ IF NOT EXISTS(SELECT * FROM post WHERE id = @id)
+ BEGIN
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid post')
+    RETURN
+ END
+
  IF NOT EXISTS(SELECT * FROM area WHERE name = @newArea)
  BEGIN
     RAISERROR ('%d: %s', 16, 1, 100, 'Invalid area')
