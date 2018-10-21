@@ -495,6 +495,110 @@ describe('Post views tests', () => {
 	});
 });
 
+describe('Post tags tests', () => {
+	before(async function() {
+		this.timeout(0);
+
+		await cm.openConnection();
+		await cm.execSql('INSERT INTO tag values (\'Tag 1\')');
+		await cm.execSql('INSERT INTO tag values (\'Tag 2\')');
+		await cm.execSql('INSERT INTO tag values (\'Tag 3\')');
+		await cm.closeConnection();
+	});
+
+	it('should throw an error trying to access the tags of a nonexistent post', (done) => {
+		request.get('/api/posts/4/tags')
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should return 0 tags in the post 2', (done) => {
+		request.get('/api/posts/2/tags')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.tags.length).to.equal(0);
+				done(err);
+			});
+	});
+
+	it('should throw an error trying to add a tag in a nonexistent post', (done) => {
+		request.post('/api/posts/4/tags')
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should add the tags "Tag 1", "Tag 2" and "Tag 3" in post 2', (done) => {
+		request.post('/api/posts/2/tags')
+			.send({
+				tags: [
+					'Tag 1',
+					'Tag 2',
+					'Tag 3'
+				]
+			})
+			.expect(200)
+			.end((err, res) => done(err));
+	});
+
+	it('should add the tag "Tag 3" post 3', (done) => {
+		request.post('/api/posts/3/tags')
+			.send({
+				tags: 'Tag 3'
+			})
+			.expect(200)
+			.end((err, res) => done(err));
+	});
+
+	it('should return 3 tags in the post 2', (done) => {
+		request.get('/api/posts/2/tags')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.tags.length).to.equal(3);
+				done(err);
+			});
+	});
+
+	it('should return 1 tag in the post 3', (done) => {
+		request.get('/api/posts/3/tags')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.tags.length).to.equal(1);
+				done(err);
+			});
+	});
+
+	it('should delete the tags "Tag 1" and "Tag 2" in post 2', (done) => {
+		request.delete('/api/posts/2/tags')
+			.send({
+				tags: [
+					'Tag 1',
+					'Tag 2'
+				]
+			})
+			.expect(200)
+			.end((err, res) => done(err));
+	});
+
+	it('should delete the tag "Tag 3" in post 3', (done) => {
+		request.delete('/api/posts/3/tags')
+			.send({
+				tags: 'Tag 3'
+			})
+			.expect(200)
+			.end((err, res) => done(err));
+	});
+
+	it('should return 1 tag in the post 2 and it must be "Tag 3"', (done) => {
+		request.get('/api/posts/2/tags')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.tags.length).to.equal(1);
+				expect(res.body.tag[0]).to.equal('Tag 3');
+				done(err);
+			});
+	});
+});
+
 after(function() {
 	this.timeout(0);
 	return cm.deleteContainer();
