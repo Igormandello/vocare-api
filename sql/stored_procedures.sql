@@ -62,7 +62,7 @@ GO
 
 ---------------------------------------------------------------------------
 
---Deletes the suer from database
+--Deletes the user from database
 CREATE PROCEDURE sp_delete_user
     @id int
 AS
@@ -210,6 +210,24 @@ AS
 
  INSERT INTO post values (@user_id, @title, @message, (SELECT GETDATE()), (SELECT id FROM area WHERE name = @area))
  SELECT * FROM post WHERE id = (SELECT MAX(id) FROM post)
+GO
+
+---------------------------------------------------------------------------
+
+--Deletes the post from database
+CREATE PROCEDURE sp_delete_post
+    @id int
+AS
+ IF NOT EXISTS(SELECT * FROM post WHERE id = @id)
+ BEGIN
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid post id')
+    RETURN
+ END
+
+ DELETE FROM post_tag WHERE post_id = @id
+ DELETE FROM post_view WHERE post_id = @id
+ DELETE FROM comment WHERE post_id = @id
+ DELETE FROM post WHERE id = @id
 GO
 
 ---------------------------------------------------------------------------
