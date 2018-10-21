@@ -26,7 +26,16 @@ router.get('/:id(\\d+)', (req, res) => {
 });
 
 router.get('/:id(\\d+)/views', (req, res) => {
-  res.status(501).send('GET response');
+  runSql('exec sp_post_views @id',
+    { name: 'id', type: mssql.Int, value: req.params.id }
+  ).then((result) => {
+    if (result.recordset.length == 0) {
+      res.status(400).send();
+      return;
+    }
+
+    res.send(result.recordset[0]);
+  }).catch((e) => res.status(400).send(e));
 });
 
 router.post('/', (req, res) => {
