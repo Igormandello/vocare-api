@@ -355,13 +355,12 @@ describe('Posts endpoint tests', () => {
 			});
 	});
 
-	it('should return the post with id 1, which have title "post title 1" and 0 comments', (done) => {
+	it('should return the post with id 1, which have title "post title 1"', (done) => {
 		request.get('/api/posts/1')
 			.expect(200)
 			.end((err, res) => {
 				expect(res.body.id).to.equal(1);
-				expect(res.body.title.length).to.equal('post title 1');
-				expect(res.body.comments.length).to.equal(0);
+				expect(res.body.title).to.equal('post title 1');
 				done(err);
 			});
 	});
@@ -399,13 +398,12 @@ describe('Posts endpoint tests', () => {
 			.end((err, res) => done(err));
 	});
 
-	it('should return the post with id 1, which now have title "new post title" and 0 comments', (done) => {
+	it('should return the post with id 1, which now have title "new post title"', (done) => {
 		request.get('/api/posts/1')
 			.expect(200)
 			.end((err, res) => {
 				expect(res.body.id).to.equal(1);
-				expect(res.body.title.length).to.equal('new post title');
-				expect(res.body.comments.length).to.equal(0);
+				expect(res.body.title).to.equal('new post title');
 				done(err);
 			});
 	});
