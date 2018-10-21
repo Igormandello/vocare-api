@@ -118,18 +118,6 @@ GO
 
 ---------------------------------------------------------------------------
 
---Saves the settings changes
-CREATE PROCEDURE sp_save_settings
-    @id int,
-    @name varchar(30),
-    @email varchar(255),
-    @password varchar(64)
-AS
- UPDATE [user] SET username = @name, email = @email, password = @password WHERE id = @id
-GO
-
----------------------------------------------------------------------------
-
 --Counts the unreaden notifications from an unser
 CREATE PROCEDURE sp_unreaden_notifications
     @id int
@@ -173,6 +161,24 @@ AS
  
  IF NOT EXISTS(SELECT * FROM post_view WHERE post_id = @id AND user_id = @user_id)
     INSERT INTO post_view values (@id, @user_id)
+GO
+
+---------------------------------------------------------------------------
+
+--Save editions
+CREATE PROCEDURE sp_edit_post
+    @id int,
+    @newTitle varchar(100),
+    @newMessage varchar(MAX),
+    @newArea varchar(30)
+AS
+ IF NOT EXISTS(SELECT * FROM area WHERE name = @newArea)
+ BEGIN
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid area')
+    RETURN
+ END
+
+ UPDATE post SET title = @newTitle, message = @newMessage, area_id = (SELECT id FROM area WHERE name = @newArea) WHERE id = @id
 GO
 
 ---------------------------------------------------------------------------
