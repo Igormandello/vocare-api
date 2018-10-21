@@ -299,4 +299,10 @@ GO
 CREATE PROCEDURE sp_post_views
     @id int
 AS
- SELECT COUNT(*) FROM post_view WHERE post_id = @id
+ IF NOT EXISTS(SELECT * FROM post WHERE id = @id)
+ BEGIN
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid post id')
+    RETURN
+ END
+
+ SELECT COUNT(*) AS views FROM post_view WHERE post_id = @id
