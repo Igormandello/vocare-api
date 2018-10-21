@@ -153,9 +153,13 @@ GO
 --Selects the last @amount posts in the discussion, skipping the @offset
 CREATE PROCEDURE sp_discussion_posts
     @offset int,
-    @amount int
+    @amount int,
+    @id AS int = 0
 AS
- SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(ORDER BY posted_on DESC) AS number, * FROM post) indexes WHERE indexes.number > @offset
+ IF @id <= 0
+    SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(ORDER BY posted_on DESC) AS number, * FROM post) indexes WHERE indexes.number > @offset
+ ELSE
+    SELECT * FROM post WHERE id = @id
 GO
 
 ---------------------------------------------------------------------------
