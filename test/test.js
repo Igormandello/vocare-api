@@ -516,7 +516,7 @@ describe('Post tags tests', () => {
 		request.get('/api/posts/2/tags')
 			.expect(200)
 			.end((err, res) => {
-				expect(res.body.tags.length).to.equal(0);
+				expect(res.body.length).to.equal(0);
 				done(err);
 			});
 	});
@@ -536,7 +536,7 @@ describe('Post tags tests', () => {
 					'Tag 3'
 				]
 			})
-			.expect(200)
+			.expect(201)
 			.end((err, res) => done(err));
 	});
 
@@ -545,7 +545,7 @@ describe('Post tags tests', () => {
 			.send({
 				tags: 'Tag 3'
 			})
-			.expect(200)
+			.expect(201)
 			.end((err, res) => done(err));
 	});
 
@@ -553,7 +553,7 @@ describe('Post tags tests', () => {
 		request.get('/api/posts/2/tags')
 			.expect(200)
 			.end((err, res) => {
-				expect(res.body.tags.length).to.equal(3);
+				expect(res.body.length).to.equal(3);
 				done(err);
 			});
 	});
@@ -562,7 +562,7 @@ describe('Post tags tests', () => {
 		request.get('/api/posts/3/tags')
 			.expect(200)
 			.end((err, res) => {
-				expect(res.body.tags.length).to.equal(1);
+				expect(res.body.length).to.equal(1);
 				done(err);
 			});
 	});
@@ -592,8 +592,8 @@ describe('Post tags tests', () => {
 		request.get('/api/posts/2/tags')
 			.expect(200)
 			.end((err, res) => {
-				expect(res.body.tags.length).to.equal(1);
-				expect(res.body.tag[0]).to.equal('Tag 3');
+				expect(res.body.length).to.equal(1);
+				expect(res.body[0]).to.equal('Tag 3');
 				done(err);
 			});
 	});
