@@ -5,7 +5,7 @@ const { runSql } = require('../db');
 router.get('/', (req, res) => {
   let offset = 0;
   if (req.body.page && req.body.page > 0)
-    offset = 10 * page;
+    offset = 10 * req.body.page;
 
   runSql(`exec sp_discussion_posts ${offset}, 10`).then(result => {
     res.send(result.recordset);
@@ -55,7 +55,10 @@ router.put('/:id(\\d+)', (req, res) => {
 });
 
 router.delete('/:id(\\d+)', (req, res) => {
-  res.status(501).send('DELETE response');
+  runSql('exec sp_delete_post @id',
+    { name: 'id', type: mssql.Int, value: req.params.id }
+  ).then(() => res.status(200).send())
+  .catch(e => res.status(400).send(e));
 });
 
 module.exports = router;

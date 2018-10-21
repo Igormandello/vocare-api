@@ -245,7 +245,7 @@ describe('Users endpoint tests', () => {
 			.end(err => done(err));
 	});
 
-	it('should throw an error due to a invalid user id', (done) => {
+	it('should throw an error due to an invalid user id', (done) => {
 		request.delete('/api/users/3')
 			.expect(400)
 			.end(err => done(err));
