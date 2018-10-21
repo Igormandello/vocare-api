@@ -232,15 +232,44 @@ GO
 
 ---------------------------------------------------------------------------
 
---Ads a tag to a post
+--Adds a tag to a post
 CREATE PROCEDURE sp_add_tag
     @post_id int,
     @tag varchar(30)
 AS
- IF NOT EXISTS(SELECT * FROM tag WHERE name = @tag)
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid area')
+ IF NOT EXISTS(SELECT * FROM post WHERE id = @post_id)
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid post')
+ ELSE IF NOT EXISTS(SELECT * FROM tag WHERE name = @tag)
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid tag')
  ELSE
     INSERT INTO post_tag values (@post_id, (SELECT id FROM tag WHERE name = @tag))
+GO
+
+---------------------------------------------------------------------------
+
+--Removes a tag from a post
+CREATE PROCEDURE sp_remove_tag
+    @post_id int,
+    @tag varchar(30)
+AS
+ IF NOT EXISTS(SELECT * FROM post WHERE id = @post_id)
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid post')
+ ELSE IF NOT EXISTS(SELECT * FROM tag WHERE name = @tag)
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid tag')
+ ELSE
+    DELETE FROM post_tag WHERE post_id = @post_id and tag_id = (SELECT id FROM tag WHERE name = @tag)
+GO
+
+---------------------------------------------------------------------------
+
+--List all the tags from a post
+CREATE PROCEDURE sp_post_tags
+    @post_id int
+AS
+ IF NOT EXISTS(SELECT * FROM post WHERE id = @post_id)
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid post')
+ ELSE
+    SELECT name FROM tag WHERE id IN (SELECT tag_id from post_tag WHERE post_id = @post_id)
 GO
 
 ---------------------------------------------------------------------------
