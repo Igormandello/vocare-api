@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/Igormandello/vocare-api.svg?branch=master)](https://travis-ci.org/Igormandello/vocare-api) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
 # Vocare API
 
 RESTful API used in Vocare
