@@ -651,6 +651,81 @@ describe('Post messages tests', () => {
 	});
 });
 
+describe('Tags endpoint tests', () => {
+	before(async function() {
+		this.timeout(0);
+
+		await deleteData();
+		await cm.openConnection();
+		await cm.execSql('DBCC CHECKIDENT(\'user\', RESEED, 0)');
+		await cm.execSql('DBCC CHECKIDENT(\'area\', RESEED, 0)');
+		await cm.execSql('DBCC CHECKIDENT(\'post\', RESEED, 0)');
+		await cm.execSql('DBCC CHECKIDENT(\'tag\', RESEED, 0)');
+		await cm.execSql('INSERT INTO tag VALUES (\'Tag 1\')');
+		await cm.closeConnection();
+	});
+
+	it('should return 1 tag', (done) => {
+		request.get('/api/tags/')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(1);
+				done(err);
+			});
+	});
+
+	it('should return the tag with id 1, which has name "Tag 1"', (done) => {
+		request.get('/api/tags/1')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.id).to.equal(1);
+				expect(res.body.name).to.equal("Tag 1");
+				done(err);
+			});
+	});
+
+	it('should throw an error trying to get an invalid tag', (done) => {
+		request.get('/api/tags/2')
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+});
+
+describe('Areas endpoint tests', () => {
+	before(async function() {
+		this.timeout(0);
+
+		await cm.openConnection();
+		await cm.execSql('INSERT INTO area VALUES (\'Area 1\')');
+		await cm.closeConnection();
+	});
+
+	it('should return 1 area', (done) => {
+		request.get('/api/areas/')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(1);
+				done(err);
+			});
+	});
+
+	it('should return the area with id 1, which has name "Area 1"', (done) => {
+		request.get('/api/areas/1')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.id).to.equal(1);
+				expect(res.body.name).to.equal("Area 1");
+				done(err);
+			});
+	});
+
+	it('should throw an error trying to get an invalid area', (done) => {
+		request.get('/api/areas/2')
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+});
+
 after(function() {
 	this.timeout(0);
 	return cm.deleteContainer();
