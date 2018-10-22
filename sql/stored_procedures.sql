@@ -297,30 +297,42 @@ GO
 
 ---------------------------------------------------------------------------
 
---Selects @amount couses from starting from @offset of @area
---If @area isn't specified, all areas are selected
+--Selects @amount couses from area, starting from @offset
 CREATE PROCEDURE sp_filter_courses
     @offset int,
     @amount int,
-    @area AS varchar(30) = ''
+    @area varchar(30)
 AS
- IF @area <> ''
-    IF NOT EXISTS(SELECT * FROM area WHERE name = @area)
-        RAISERROR ('%d: %s', 16, 1, 100, 'Invalid area')
-    ELSE
-        SELECT TOP(@amount) * FROM (
-            SELECT ROW_NUMBER() OVER(ORDER BY name) AS number, * FROM course WHERE area_id = (SELECT id FROM area WHERE name = @area)
-        ) indexes WHERE indexes.number > @offset
+ IF NOT EXISTS(SELECT * FROM area WHERE name = @area)
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid area')
  ELSE
-    SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(ORDER BY name) AS number, * FROM course) indexes WHERE indexes.number > @offset
+    SELECT TOP(@amount) * FROM (
+        SELECT ROW_NUMBER() OVER(ORDER BY name) AS number, * FROM course WHERE area_id = (SELECT id FROM area WHERE name = @area)
+    ) indexes WHERE indexes.number > @offset
 GO
      
 ---------------------------------------------------------------------------
 
---Selects all the area names
-CREATE PROCEDURE sp_area_names
+--Selects all the areas
+CREATE PROCEDURE sp_areas
+    @id AS int = 0
 AS
+ IF @id <= 0
     SELECT * FROM area
+ ELSE
+    SELECT * FROM area WHERE id = @id
+GO
+
+---------------------------------------------------------------------------
+
+--Selects all the tags
+CREATE PROCEDURE sp_tags
+    @id AS int = 0
+AS
+ IF @id <= 0
+    SELECT * FROM tag
+ ELSE
+    SELECT * FROM tag WHERE id = @id
 GO
 
 ---------------------------------------------------------------------------
