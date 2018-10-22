@@ -51,7 +51,7 @@ For development, you will need Node.js, Yarn, and Docker installed on your envir
 ###
 ### Docker
   The Docker installation tutorials can be found in the [official Docker website](https://www.docker.com/)
-  
+
   - [Docker installation on Windows 10](https://store.docker.com/editions/community/docker-ce-desktop-windows)
 
   - [Docker installation on any other Windows version](https://docs.docker.com/toolbox/overview/)
@@ -75,7 +75,11 @@ For development, you will need Node.js, Yarn, and Docker installed on your envir
 
   Open the created file then edit it with your settings. You will need:
 
-  - `CONTAINER_PASSWORD` in order to test the project;
+  - `CONTAINER_PASSWORD` (Only used for testing);
+  - `DB_USER`;
+  - `DB_PASSWORD`;
+  - `DB_HOST`;
+  - `DB`;
 
 ## Running the project
 
