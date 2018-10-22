@@ -599,6 +599,49 @@ describe('Post tags tests', () => {
 	});
 });
 
+describe('Post messages tests', () => {
+	before(async function() {
+		this.timeout(0);
+
+		await deleteData();
+		await cm.openConnection();
+		await cm.execSql('DBCC CHECKIDENT(\'user\', RESEED, 0)');
+		await cm.execSql('DBCC CHECKIDENT(\'area\', RESEED, 0)');
+		await cm.execSql('DBCC CHECKIDENT(\'post\', RESEED, 0)');
+		await cm.execSql('exec sp_register_user \'email@gmail.com\', \'password\', \'user1\'');
+		await cm.execSql('INSERT INTO area VALUES (\'Valid Area 1\')');
+		await cm.execSql('INSERT INTO post VALUES (1, \'a\', \'b\', \'08-20-2018 12:15:00\', 1)');
+		await cm.execSql('INSERT INTO post VALUES (1, \'a\', \'b\', \'08-20-2018 12:15:00\', 1)');
+		await cm.execSql('INSERT INTO comment VALUES (2, 1, \'a\', \'08-20-2018 12:15:00\')');
+		await cm.closeConnection();
+	});
+
+	it('should return 0 comments in post 1', () => {
+		request.get('/api/posts/1/comments')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(0);
+				done(err);
+			});
+	});
+
+	it('should return 1 comments in post 2', () => {
+		request.get('/api/posts/2/comments')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(1);
+				expect(res.body[0].id).to.equal(1);
+				done(err);
+			});
+	});
+
+	it('should throw an error trying to get the comments of a nonexistent post', () => {
+		request.get('/api/posts/3/comments')
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+});
+
 after(function() {
 	this.timeout(0);
 	return cm.deleteContainer();
