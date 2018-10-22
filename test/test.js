@@ -616,7 +616,7 @@ describe('Post messages tests', () => {
 		await cm.closeConnection();
 	});
 
-	it('should return 0 comments in post 1', () => {
+	it('should return 0 comments in post 1', (done) => {
 		request.get('/api/posts/1/comments')
 			.expect(200)
 			.end((err, res) => {
@@ -625,7 +625,7 @@ describe('Post messages tests', () => {
 			});
 	});
 
-	it('should return 1 comments in post 2', () => {
+	it('should return 1 comments in post 2', (done) => {
 		request.get('/api/posts/2/comments')
 			.expect(200)
 			.end((err, res) => {
@@ -635,7 +635,7 @@ describe('Post messages tests', () => {
 			});
 	});
 
-	it('should throw an error trying to get the comments of a nonexistent post', () => {
+	it('should throw an error trying to get the comments of a nonexistent post', (done) => {
 		request.get('/api/posts/3/comments')
 			.expect(400)
 			.end((err, res) => done(err));
