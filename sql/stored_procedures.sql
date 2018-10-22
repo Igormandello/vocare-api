@@ -163,10 +163,22 @@ CREATE PROCEDURE sp_post_comments
     @id int,
     @user_id int
 AS
- SELECT * from comment where post_id = @id ORDER BY commented_on
+ IF NOT EXISTS(SELECT * FROM post WHERE id = @id)
+ BEGIN
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid post')
+    RETURN
+ END
+
+ IF NOT EXISTS(SELECT * FROM [user] WHERE id = @user_id)
+ BEGIN
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid user')
+    RETURN
+ END
  
  IF NOT EXISTS(SELECT * FROM post_view WHERE post_id = @id AND user_id = @user_id)
     INSERT INTO post_view values (@id, @user_id)
+
+ SELECT * from comment where post_id = @id ORDER BY commented_on
 GO
 
 ---------------------------------------------------------------------------

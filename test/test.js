@@ -618,6 +618,9 @@ describe('Post messages tests', () => {
 
 	it('should return 0 comments in post 1', (done) => {
 		request.get('/api/posts/1/comments')
+			.send({
+				user_id: 1
+			})
 			.expect(200)
 			.end((err, res) => {
 				expect(res.body.length).to.equal(0);
@@ -627,6 +630,9 @@ describe('Post messages tests', () => {
 
 	it('should return 1 comments in post 2', (done) => {
 		request.get('/api/posts/2/comments')
+			.send({
+				user_id: 1
+			})
 			.expect(200)
 			.end((err, res) => {
 				expect(res.body.length).to.equal(1);
@@ -637,6 +643,9 @@ describe('Post messages tests', () => {
 
 	it('should throw an error trying to get the comments of a nonexistent post', (done) => {
 		request.get('/api/posts/3/comments')
+			.send({
+				user_id: 1
+			})
 			.expect(400)
 			.end((err, res) => done(err));
 	});

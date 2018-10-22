@@ -45,6 +45,14 @@ router.get('/:id(\\d+)/tags', (req, res) => {
   .catch((e) => res.status(400).send(e));
 });
 
+router.get('/:id(\\d+)/comments', (req, res) => {
+  runSql('exec sp_post_comments @id, @user_id',
+    { name: 'id', type: mssql.Int, value: req.params.id },
+    { name: 'user_id', type: mssql.Int, value: req.body.user_id }
+  ).then((result) => res.send(result.recordset))
+  .catch((e) => res.status(400).send(e));
+});
+
 router.post('/', (req, res) => {
   runSql('exec sp_post_create @user_id, @title, @message, @area',
     { name: 'user_id', type: mssql.Int, value: req.body.user_id },
