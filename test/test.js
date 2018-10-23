@@ -261,6 +261,48 @@ describe('Users endpoint tests', () => {
 	});
 });
 
+describe('User notifications tests', () => {
+	before(async function() {
+		this.timeout(0);
+
+		await deleteData();
+		await cm.openConnection();
+		await cm.execSql('INSERT INTO notification VALUES (1, \'Notification 1\', \'08-20-2018 12:15:00\', 0)');
+		await cm.execSql('INSERT INTO notification VALUES (1, \'Notification 1\', \'08-20-2018 12:15:00\', 1)');
+		await cm.closeConnection();
+	});
+
+	it('should return only 1 unreaden notification', (done) => {
+		request.get('/api/users/1/notifications/unreaden')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.amount).to.equal(1);
+				expect()
+				done(err);
+			});
+	});
+
+	it('should return the 2 notifications', (done) => {
+		request.get('/api/users/1/notifications')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(2);
+				expect()
+				done(err);
+			});
+	});
+
+	it('should return no unreaden notifications', (done) => {
+		request.get('/api/users/1/notifications/unreaden')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.amount).to.equal(0);
+				expect()
+				done(err);
+			});
+	});
+});
+
 describe('User messages tests', () => {
 	before(async function() {
 		this.timeout(0);
