@@ -128,6 +128,12 @@ GO
 CREATE PROCEDURE sp_unreaden_notifications
     @id int
 AS
+ IF NOT EXISTS(SELECT * FROM [user] WHERE id = @id)
+ BEGIN
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid user')
+    RETURN
+ END
+
  SELECT COUNT(*) as amount FROM notification WHERE user_id = @id and state = 0
 GO
 
@@ -139,6 +145,13 @@ CREATE PROCEDURE sp_user_notifications
     @offset int,
     @amount int
 AS
+ IF NOT EXISTS(SELECT * FROM [user] WHERE id = @id)
+ BEGIN
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid user')
+    RETURN
+ END
+
+ UPDATE notification SET state = 1 where id in (SELECT TOP(@amount) id FROM (SELECT ROW_NUMBER() OVER(ORDER BY data) AS number, * FROM notification WHERE user_id = @id) indexes WHERE indexes.number > @offset)
  SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(ORDER BY data) AS number, * FROM notification WHERE user_id = @id) indexes WHERE indexes.number > @offset
 GO
 

@@ -39,6 +39,25 @@ router.get('/:id(\\d+)/messages', (req, res) => {
   ).then(result => res.send(result.recordset[0]));
 });
 
+router.get('/:id(\\d+)/notifications', (req, res) => {
+  let offset = 0;
+  if (req.body.page && req.body.page > 0)
+    offset = 10 * req.body.page;
+
+  runSql('exec sp_user_notifications @id, @offset, 10',
+    { name: 'id', type: mssql.Int, value: req.params.id },
+    { name: 'offset', type: mssql.Int, value: offset }
+  ).then(result => res.send(result.recordset[0]))
+  .catch((e) => res.status(400).send(e));
+});
+
+router.get('/:id(\\d+)/notifications/unreaden', (req, res) => {
+  runSql('exec sp_unreaden_notifications @id',
+    { name: 'id', type: mssql.Int, value: req.params.id }
+  ).then(result => res.send({ amount: result.recordset[0].amount }))
+  .catch((e) => res.status(400).send(e));
+});
+
 router.get('/login', (req, res) => {
   if (req.body.email && req.body.password)
     runSql('exec sp_user_login @email, @password',

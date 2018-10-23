@@ -265,10 +265,9 @@ describe('User notifications tests', () => {
 	before(async function() {
 		this.timeout(0);
 
-		await deleteData();
 		await cm.openConnection();
 		await cm.execSql('INSERT INTO notification VALUES (1, \'Notification 1\', \'08-20-2018 12:15:00\', 0)');
-		await cm.execSql('INSERT INTO notification VALUES (1, \'Notification 1\', \'08-20-2018 12:15:00\', 1)');
+		await cm.execSql('INSERT INTO notification VALUES (1, \'Notification 2\', \'09-20-2018 12:15:00\', 1)');
 		await cm.closeConnection();
 	});
 
