@@ -726,6 +726,94 @@ describe('Areas endpoint tests', () => {
 	});
 });
 
+describe('Comments endpoint tests', () => {
+	before(async function() {
+		this.timeout(0);
+
+		await deleteData();
+		await cm.openConnection();
+		await cm.execSql('DBCC CHECKIDENT(\'area\', RESEED, 0)');
+		await cm.execSql('exec sp_register_user \'email@gmail.com\', \'password\', \'user1\'');
+		await cm.execSql('INSERT INTO area VALUES (\'Area 1\')');
+		await cm.execSql('INSERT INTO post VALUES (1, \'a\', \'b\', \'08-20-2018 12:15:00\', 1)');
+		await cm.closeConnection();
+	});
+
+	it('should return 0 comments', (done) => {
+		request.get('/api/comments/')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(0);
+				done(err);
+			});
+	});
+
+	it('should create a comment with message "test message"', (done) => {
+		request.post('/api/comments/')
+			.send({
+				post_id: 1,
+				user_id: 1,
+				message: 'test message'
+			})
+			.expect(200)
+			.end((err, res) => done(err));
+	});
+
+	it('should return 1 comment', (done) => {
+		request.get('/api/comments/')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(1);
+				done(err);
+			});
+	});
+
+	it('should change the comment 1 message to "new test message"', (done) => {
+		request.post('/api/comments/1')
+			.send({
+				message: 'new test message'
+			})
+			.expect(200)
+			.end((err, res) => done(err));
+	});
+
+	it('should return the comment 1 with "new test message"', (done) => {
+		request.get('/api/comments/1')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.message).to.equal('new test message');
+				done(err);
+			});
+	});
+
+	it('should throw an error trying to get a nonexistent comment', (done) => {
+		request.get('/api/comments/2')
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should delete the comment 1', (done) => {
+		request.delete('/api/comments/1')
+			.expect(200)
+			.end((err, res) => done(err));
+	});
+
+	it('should throw an error trying to delete a nonexistent comment', (done) => {
+		request.delete('/api/comments/2')
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should return 0 comments again', (done) => {
+		request.get('/api/comments/')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(0);
+				done(err);
+			});
+	});
+});
+
 after(function() {
 	this.timeout(0);
 	return cm.deleteContainer();
