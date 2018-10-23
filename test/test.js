@@ -189,56 +189,6 @@ describe('Users endpoint tests', () => {
 			});
 	});
 
-	it('should login the "newuser1"', (done) => {
-		request.get('/api/users/login')
-			.send({
-				email: 'newtestmail@gmail.com',
-				password: 'newExamplePassword'
-			})
-			.expect(200)
-			.end((err, res) => {
-				expect(res.body.id).to.equal(1);
-				expect(res.body.username).to.equal('newuser1');
-				expect(res.body.profile_picture).to.equal(null);
-				done(err);
-			});
-	});
-
-	it('should not login with email and password and throw an error', (done) => {
-		request.get('/api/users/login')
-			.send({
-				email: 'newtestmail@gmail.com',
-				password: 'randomPassword'
-			})
-			.expect(400)
-			.end((err, res) => done(err));
-	});
-
-	it('should login the "user2"', (done) => {
-		request.get('/api/users/login')
-			.send({
-				provider: 'github',
-				access_token: 'generatedAccessToken:)'
-			})
-			.expect(200)
-			.end((err, res) => {
-				expect(res.body.id).to.equal(2);
-				expect(res.body.username).to.equal('user2');
-				expect(res.body.profile_picture).to.equal(null);
-				done(err);
-			});
-	});
-
-	it('should not login with provider and access token and throw an error', (done) => {
-		request.get('/api/users/login')
-			.send({
-				provider: 'github',
-				access_token: 'wrongGeneratedAccessToken:('
-			})
-			.expect(400)
-			.end((err, res) => done(err));
-	});
-
 	it('should delete the user with id 2', (done) => {
 		request.delete('/api/users/2')
 			.expect(200)
@@ -258,6 +208,66 @@ describe('Users endpoint tests', () => {
 				expect(res.body.length).to.equal(1);
 				done(err);
 			});
+	});
+});
+
+describe('Auth endpoint tests', () => {
+	before(async function() {
+		this.timeout(0);
+
+		await cm.openConnection();
+		await cm.execSql('exec sp_register_user_media \'github\', \'generatedAccessToken:)\', -1, \'user3\'');
+		await cm.closeConnection();
+	});
+
+	it('should login the "newuser1"', (done) => {
+		request.get('/api/auth/login')
+			.send({
+				email: 'newtestmail@gmail.com',
+				password: 'newExamplePassword'
+			})
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.id).to.equal(1);
+				expect(res.body.username).to.equal('newuser1');
+				expect(res.body.profile_picture).to.equal(null);
+				done(err);
+			});
+	});
+
+	it('should not login with email and password and throw an error', (done) => {
+		request.get('/api/auth/login')
+			.send({
+				email: 'newtestmail@gmail.com',
+				password: 'randomPassword'
+			})
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should login the "user3"', (done) => {
+		request.get('/api/auth/login')
+			.send({
+				provider: 'github',
+				access_token: 'generatedAccessToken:)'
+			})
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.id).to.equal(3);
+				expect(res.body.username).to.equal('user3');
+				expect(res.body.profile_picture).to.equal(null);
+				done(err);
+			});
+	});
+
+	it('should not login with provider and access token and throw an error', (done) => {
+		request.get('/api/auth/login')
+			.send({
+				provider: 'github',
+				access_token: 'wrongGeneratedAccessToken:('
+			})
+			.expect(400)
+			.end((err, res) => done(err));
 	});
 });
 
