@@ -863,6 +863,74 @@ describe('Comments endpoint tests', () => {
 	});
 });
 
+describe('Courses endpoint tests', () => {
+	before(async function() {
+		this.timeout(0);
+
+		await cm.openConnection();
+		await cm.execSql('INSERT INTO area VALUES (\'Area 1\')');
+		await cm.closeConnection();
+	});
+
+	it('should return 0 courses', (done) => {
+		request.get('/api/courses/')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(0);
+				done(err);
+			});
+	});
+
+	it('should create a course with name "Course 1"', (done) => {
+		request.post('/api/courses/')
+			.send({
+				name: 'Course 1',
+				shortname: 'course1',
+				description: 'A nice course',
+				area: 'Area 1'
+			})
+			.expect(201)
+			.end((err, res) => done(err));
+	});
+
+	it('should throw an error trying to create a course of a nonexisting area', (done) => {
+		request.post('/api/courses/')
+			.send({
+				name: 'Course 2',
+				shortname: 'course2',
+				description: 'A nice course',
+				area: 'Area 2'
+			})
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should return the course with id 1, which has name "Course 1"', (done) => {
+		request.get('/api/courses/1')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.id).to.equal(1);
+				expect(res.body.name).to.equal("Course 1");
+				done(err);
+			});
+	});
+
+	it('should throw an error trying to get an invalid course', (done) => {
+		request.get('/api/courses/2')
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should return 1 course', (done) => {
+		request.get('/api/courses')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(1);
+				done(err)
+			});
+	});
+});
+
 after(function() {
 	this.timeout(0);
 	return cm.deleteContainer();
