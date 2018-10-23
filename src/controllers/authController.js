@@ -1,8 +1,10 @@
 const router = require('express').Router();
 const sha256 = require('sha256');
 const mssql = require('mssql');
+const crypto = require('crypto');
 const { runSql } = require('../db');
 
+let valid_tokens = {};
 router.get('/login', (req, res) => {
   if (req.body.email && req.body.password)
     runSql('exec sp_user_login @email, @password',
@@ -18,7 +20,8 @@ router.get('/login', (req, res) => {
       res.send({
         id: obj.id,
         username: obj.username,
-        profile_picture: obj.profile_picture
+        profile_picture: obj.profile_picture,
+        access_token: createToken(obj.id)
       });
     }).catch((e) => res.status(400).send(e));
   else
@@ -35,9 +38,17 @@ router.get('/login', (req, res) => {
       res.send({
         id: obj.id,
         username: obj.username,
-        profile_picture: obj.profile_picture
+        profile_picture: obj.profile_picture,
+        access_token: createToken(obj.id)
       });
     }).catch((e) => res.status(400).send(e));
 });
+
+function createToken(id) {
+  let token = crypto.randomBytes(64).toString('hex');
+  valid_tokens[id] = token;
+
+  return token;
+}
 
 module.exports = router;
