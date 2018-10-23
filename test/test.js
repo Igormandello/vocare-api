@@ -661,17 +661,34 @@ describe('Tags endpoint tests', () => {
 		await cm.execSql('DBCC CHECKIDENT(\'area\', RESEED, 0)');
 		await cm.execSql('DBCC CHECKIDENT(\'post\', RESEED, 0)');
 		await cm.execSql('DBCC CHECKIDENT(\'tag\', RESEED, 0)');
-		await cm.execSql('INSERT INTO tag VALUES (\'Tag 1\')');
 		await cm.closeConnection();
 	});
 
-	it('should return 1 tag', (done) => {
+	it('should return 0 tags', (done) => {
 		request.get('/api/tags/')
 			.expect(200)
 			.end((err, res) => {
-				expect(res.body.length).to.equal(1);
+				expect(res.body.length).to.equal(0);
 				done(err);
 			});
+	});
+
+	it('should create a tag with name "Tag 1"', (done) => {
+		request.post('/api/tags/')
+			.send({
+				name: 'Tag 1'
+			})
+			.expect(201)
+			.end((err, res) => done(err));
+	});
+
+	it('should throw an error trying to create a tag with an existing name', (done) => {
+		request.post('/api/tags/')
+			.send({
+				name: 'tag 1'
+			})
+			.expect(400)
+			.end((err, res) => done(err));
 	});
 
 	it('should return the tag with id 1, which has name "Tag 1"', (done) => {
@@ -688,6 +705,15 @@ describe('Tags endpoint tests', () => {
 		request.get('/api/tags/2')
 			.expect(400)
 			.end((err, res) => done(err));
+	});
+
+	it('should return 1 tag', (done) => {
+		request.get('/api/tags')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(1);
+				done(err)
+			});
 	});
 });
 
