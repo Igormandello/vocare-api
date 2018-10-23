@@ -339,6 +339,21 @@ GO
 
 ---------------------------------------------------------------------------
 
+--Creates a course
+CREATE PROCEDURE sp_create_course
+    @name varchar(50),
+    @shortname varchar(30),
+    @description varchar(300),
+    @area_name varchar(30)
+AS
+ IF NOT EXISTS(SELECT * FROM area WHERE name = @area_name)
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid area')
+ ELSE
+    INSERT INTO course values (@name, @shortname, @description, (SELECT id FROM area WHERE name = @area_name))
+GO
+
+---------------------------------------------------------------------------
+
 --Selects @amount couses from area, starting from @offset
 CREATE PROCEDURE sp_filter_courses
     @offset int,
@@ -399,6 +414,18 @@ AS
     SELECT * FROM comment
  ELSE
     SELECT * FROM comment where id = @id
+GO
+
+---------------------------------------------------------------------------
+
+--Selects all the courses
+CREATE PROCEDURE sp_courses
+    @id AS int = 0
+AS
+ IF @id <= 0
+    SELECT * FROM course
+ ELSE
+    SELECT * FROM course where id = @id
 GO
 
 ---------------------------------------------------------------------------
