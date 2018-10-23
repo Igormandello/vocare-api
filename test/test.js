@@ -733,6 +733,7 @@ describe('Comments endpoint tests', () => {
 		await deleteData();
 		await cm.openConnection();
 		await cm.execSql('DBCC CHECKIDENT(\'area\', RESEED, 0)');
+		await cm.execSql('DBCC CHECKIDENT(\'comment\', RESEED, 0)');
 		await cm.execSql('exec sp_register_user \'email@gmail.com\', \'password\', \'user1\'');
 		await cm.execSql('INSERT INTO area VALUES (\'Area 1\')');
 		await cm.execSql('INSERT INTO post VALUES (1, \'a\', \'b\', \'08-20-2018 12:15:00\', 1)');
@@ -755,7 +756,29 @@ describe('Comments endpoint tests', () => {
 				user_id: 1,
 				message: 'test message'
 			})
-			.expect(200)
+			.expect(201)
+			.end((err, res) => done(err));
+	});
+
+	it('should throw an error trying to add to a nonexistent post', (done) => {
+		request.post('/api/comments/')
+			.send({
+				post_id: 2,
+				user_id: 1,
+				message: 'test message'
+			})
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should throw an error trying to add a comment from a nonexistent user', (done) => {
+		request.post('/api/comments/')
+			.send({
+				post_id: 1,
+				user_id: 2,
+				message: 'test message'
+			})
+			.expect(400)
 			.end((err, res) => done(err));
 	});
 
@@ -769,7 +792,7 @@ describe('Comments endpoint tests', () => {
 	});
 
 	it('should change the comment 1 message to "new test message"', (done) => {
-		request.post('/api/comments/1')
+		request.put('/api/comments/1')
 			.send({
 				message: 'new test message'
 			})
