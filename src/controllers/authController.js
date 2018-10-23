@@ -44,9 +44,24 @@ router.get('/login', (req, res) => {
     }).catch((e) => res.status(400).send(e));
 });
 
+router.get('/logoff', (req, res) => {
+  if (req.body.access_token && req.body.id) {
+    let token = req.body.access_token,
+        id = req.body.id;
+
+    if (valid_tokens[token] == id) {
+      delete valid_tokens[token];
+      res.send();
+      return;
+    }
+  }
+
+  res.status(400).send();
+});
+
 function createToken(id) {
   let token = crypto.randomBytes(64).toString('hex');
-  valid_tokens[id] = token;
+  valid_tokens[token] = id;
 
   return token;
 }

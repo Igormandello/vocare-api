@@ -220,6 +220,7 @@ describe('Auth endpoint tests', () => {
 		await cm.closeConnection();
 	});
 
+	let user1AccessToken;
 	it('should login the "newuser1"', (done) => {
 		request.get('/api/auth/login')
 			.send({
@@ -231,6 +232,7 @@ describe('Auth endpoint tests', () => {
 				expect(res.body.id).to.equal(1);
 				expect(res.body.username).to.equal('newuser1');
 				expect(res.body.profile_picture).to.equal(null);
+				user1AccessToken = res.body.access_token;
 				done(err);
 			});
 	});
@@ -265,6 +267,26 @@ describe('Auth endpoint tests', () => {
 			.send({
 				provider: 'github',
 				access_token: 'wrongGeneratedAccessToken:('
+			})
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should logoff the user 1', (done) => {
+		request.get('/api/auth/logoff')
+			.send({
+				access_token: user1AccessToken,
+				id: 1
+			})
+			.expect(200)
+			.end((err, res) => done(err));
+	});
+
+	it('should throw an error trying to logoff user 3', (done) => {
+		request.get('/api/auth/logoff')
+			.send({
+				access_token: 'fakeAccessToken',
+				id: 3
 			})
 			.expect(400)
 			.end((err, res) => done(err));
