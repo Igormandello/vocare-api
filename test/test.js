@@ -864,14 +864,6 @@ describe('Comments endpoint tests', () => {
 });
 
 describe('Courses endpoint tests', () => {
-	before(async function() {
-		this.timeout(0);
-
-		await cm.openConnection();
-		await cm.execSql('INSERT INTO area VALUES (\'Area 1\')');
-		await cm.closeConnection();
-	});
-
 	it('should return 0 courses', (done) => {
 		request.get('/api/courses/')
 			.expect(200)
