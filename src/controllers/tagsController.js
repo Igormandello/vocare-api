@@ -21,4 +21,11 @@ router.get('/:id(\\d+)', (req, res) => {
   }).catch(e => res.status(400).send(e));
 });
 
+router.post('/', (req, res) => {
+  runSql('exec sp_create_tag @name',
+    { name: 'name', type: mssql.VarChar(30), value: req.body.name }
+  ).then(() => res.status(201).send())
+  .catch(e => { console.log(e); res.status(400).send(e) });
+});
+
 module.exports = router;

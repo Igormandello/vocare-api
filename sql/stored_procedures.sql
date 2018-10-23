@@ -286,6 +286,18 @@ GO
 
 ---------------------------------------------------------------------------
 
+--Creates a tag
+CREATE PROCEDURE sp_create_tag
+    @name varchar(30)
+AS
+ IF EXISTS(SELECT * FROM tag WHERE UPPER(name) = UPPER(@name))
+    RAISERROR ('%d: %s', 16, 1, 100, 'Existent tag')
+ ELSE
+    INSERT INTO tag VALUES (@name)
+GO
+
+---------------------------------------------------------------------------
+
 --Creates a comment to a post
 CREATE PROCEDURE sp_comment_create
     @post_id int,
