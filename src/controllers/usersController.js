@@ -47,7 +47,7 @@ router.get('/:id(\\d+)/notifications', (req, res) => {
   runSql('exec sp_user_notifications @id, @offset, 10',
     { name: 'id', type: mssql.Int, value: req.params.id },
     { name: 'offset', type: mssql.Int, value: offset }
-  ).then(result => res.send(result.recordset[0]))
+  ).then(result => res.send(result.recordset))
   .catch((e) => res.status(400).send(e));
 });
 
