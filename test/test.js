@@ -293,6 +293,47 @@ describe('Auth endpoint tests', () => {
 	});
 });
 
+describe('User notifications tests', () => {
+	before(async function() {
+		this.timeout(0);
+
+		await cm.openConnection();
+		await cm.execSql('INSERT INTO notification VALUES (1, \'Notification 1\', \'08-20-2018 12:15:00\', 0)');
+		await cm.execSql('INSERT INTO notification VALUES (1, \'Notification 2\', \'09-20-2018 12:15:00\', 1)');
+		await cm.closeConnection();
+	});
+
+	it('should return only 1 unreaden notification', (done) => {
+		request.get('/api/users/1/notifications/unreaden')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.amount).to.equal(1);
+				expect()
+				done(err);
+			});
+	});
+
+	it('should return the 2 notifications', (done) => {
+		request.get('/api/users/1/notifications')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(2);
+				expect()
+				done(err);
+			});
+	});
+
+	it('should return no unreaden notifications', (done) => {
+		request.get('/api/users/1/notifications/unreaden')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.amount).to.equal(0);
+				expect()
+				done(err);
+			});
+	});
+});
+
 describe('User messages tests', () => {
 	before(async function() {
 		this.timeout(0);
@@ -693,17 +734,34 @@ describe('Tags endpoint tests', () => {
 		await cm.execSql('DBCC CHECKIDENT(\'area\', RESEED, 0)');
 		await cm.execSql('DBCC CHECKIDENT(\'post\', RESEED, 0)');
 		await cm.execSql('DBCC CHECKIDENT(\'tag\', RESEED, 0)');
-		await cm.execSql('INSERT INTO tag VALUES (\'Tag 1\')');
 		await cm.closeConnection();
 	});
 
-	it('should return 1 tag', (done) => {
+	it('should return 0 tags', (done) => {
 		request.get('/api/tags/')
 			.expect(200)
 			.end((err, res) => {
-				expect(res.body.length).to.equal(1);
+				expect(res.body.length).to.equal(0);
 				done(err);
 			});
+	});
+
+	it('should create a tag with name "Tag 1"', (done) => {
+		request.post('/api/tags/')
+			.send({
+				name: 'Tag 1'
+			})
+			.expect(201)
+			.end((err, res) => done(err));
+	});
+
+	it('should throw an error trying to create a tag with an existing name', (done) => {
+		request.post('/api/tags/')
+			.send({
+				name: 'tag 1'
+			})
+			.expect(400)
+			.end((err, res) => done(err));
 	});
 
 	it('should return the tag with id 1, which has name "Tag 1"', (done) => {
@@ -720,6 +778,15 @@ describe('Tags endpoint tests', () => {
 		request.get('/api/tags/2')
 			.expect(400)
 			.end((err, res) => done(err));
+	});
+
+	it('should return 1 tag', (done) => {
+		request.get('/api/tags')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(1);
+				done(err)
+			});
 	});
 });
 
@@ -755,6 +822,177 @@ describe('Areas endpoint tests', () => {
 		request.get('/api/areas/2')
 			.expect(400)
 			.end((err, res) => done(err));
+	});
+});
+
+describe('Comments endpoint tests', () => {
+	before(async function() {
+		this.timeout(0);
+
+		await deleteData();
+		await cm.openConnection();
+		await cm.execSql('DBCC CHECKIDENT(\'area\', RESEED, 0)');
+		await cm.execSql('DBCC CHECKIDENT(\'comment\', RESEED, 0)');
+		await cm.execSql('exec sp_register_user \'email@gmail.com\', \'password\', \'user1\'');
+		await cm.execSql('INSERT INTO area VALUES (\'Area 1\')');
+		await cm.execSql('INSERT INTO post VALUES (1, \'a\', \'b\', \'08-20-2018 12:15:00\', 1)');
+		await cm.closeConnection();
+	});
+
+	it('should return 0 comments', (done) => {
+		request.get('/api/comments/')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(0);
+				done(err);
+			});
+	});
+
+	it('should create a comment with message "test message"', (done) => {
+		request.post('/api/comments/')
+			.send({
+				post_id: 1,
+				user_id: 1,
+				message: 'test message'
+			})
+			.expect(201)
+			.end((err, res) => done(err));
+	});
+
+	it('should throw an error trying to add to a nonexistent post', (done) => {
+		request.post('/api/comments/')
+			.send({
+				post_id: 2,
+				user_id: 1,
+				message: 'test message'
+			})
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should throw an error trying to add a comment from a nonexistent user', (done) => {
+		request.post('/api/comments/')
+			.send({
+				post_id: 1,
+				user_id: 2,
+				message: 'test message'
+			})
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should return 1 comment', (done) => {
+		request.get('/api/comments/')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(1);
+				done(err);
+			});
+	});
+
+	it('should change the comment 1 message to "new test message"', (done) => {
+		request.put('/api/comments/1')
+			.send({
+				message: 'new test message'
+			})
+			.expect(200)
+			.end((err, res) => done(err));
+	});
+
+	it('should return the comment 1 with "new test message"', (done) => {
+		request.get('/api/comments/1')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.message).to.equal('new test message');
+				done(err);
+			});
+	});
+
+	it('should throw an error trying to get a nonexistent comment', (done) => {
+		request.get('/api/comments/2')
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should delete the comment 1', (done) => {
+		request.delete('/api/comments/1')
+			.expect(200)
+			.end((err, res) => done(err));
+	});
+
+	it('should throw an error trying to delete a nonexistent comment', (done) => {
+		request.delete('/api/comments/2')
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should return 0 comments again', (done) => {
+		request.get('/api/comments/')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(0);
+				done(err);
+			});
+	});
+});
+
+describe('Courses endpoint tests', () => {
+	it('should return 0 courses', (done) => {
+		request.get('/api/courses/')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(0);
+				done(err);
+			});
+	});
+
+	it('should create a course with name "Course 1"', (done) => {
+		request.post('/api/courses/')
+			.send({
+				name: 'Course 1',
+				shortname: 'course1',
+				description: 'A nice course',
+				area: 'Area 1'
+			})
+			.expect(201)
+			.end((err, res) => done(err));
+	});
+
+	it('should throw an error trying to create a course of a nonexisting area', (done) => {
+		request.post('/api/courses/')
+			.send({
+				name: 'Course 2',
+				shortname: 'course2',
+				description: 'A nice course',
+				area: 'Area 2'
+			})
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should return the course with id 1, which has name "Course 1"', (done) => {
+		request.get('/api/courses/1')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.id).to.equal(1);
+				expect(res.body.name).to.equal("Course 1");
+				done(err);
+			});
+	});
+
+	it('should throw an error trying to get an invalid course', (done) => {
+		request.get('/api/courses/2')
+			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should return 1 course', (done) => {
+		request.get('/api/courses')
+			.expect(200)
+			.end((err, res) => {
+				expect(res.body.length).to.equal(1);
+				done(err)
+			});
 	});
 });
 

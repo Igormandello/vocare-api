@@ -128,6 +128,12 @@ GO
 CREATE PROCEDURE sp_unreaden_notifications
     @id int
 AS
+ IF NOT EXISTS(SELECT * FROM [user] WHERE id = @id)
+ BEGIN
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid user')
+    RETURN
+ END
+
  SELECT COUNT(*) as amount FROM notification WHERE user_id = @id and state = 0
 GO
 
@@ -139,6 +145,13 @@ CREATE PROCEDURE sp_user_notifications
     @offset int,
     @amount int
 AS
+ IF NOT EXISTS(SELECT * FROM [user] WHERE id = @id)
+ BEGIN
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid user')
+    RETURN
+ END
+
+ UPDATE notification SET state = 1 where id in (SELECT TOP(@amount) id FROM (SELECT ROW_NUMBER() OVER(ORDER BY data) AS number, * FROM notification WHERE user_id = @id) indexes WHERE indexes.number > @offset)
  SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(ORDER BY data) AS number, * FROM notification WHERE user_id = @id) indexes WHERE indexes.number > @offset
 GO
 
@@ -286,13 +299,70 @@ GO
 
 ---------------------------------------------------------------------------
 
+--Creates a tag
+CREATE PROCEDURE sp_create_tag
+    @name varchar(30)
+AS
+ IF EXISTS(SELECT * FROM tag WHERE UPPER(name) = UPPER(@name))
+    RAISERROR ('%d: %s', 16, 1, 100, 'Existent tag')
+ ELSE
+    INSERT INTO tag VALUES (@name)
+GO
+
+---------------------------------------------------------------------------
+
 --Creates a comment to a post
 CREATE PROCEDURE sp_comment_create
     @post_id int,
     @user_id int,
     @message varchar(MAX)
 AS
- INSERT INTO comment values (@post_id, @user_id, @message, (SELECT GETDATE()))
+ IF NOT EXISTS(SELECT * FROM post WHERE id = @post_id)
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid post')
+ ELSE IF NOT EXISTS(SELECT * FROM [user] WHERE id = @user_id)
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid user')
+ ELSE
+    INSERT INTO comment values (@post_id, @user_id, @message, (SELECT GETDATE()))
+GO
+
+---------------------------------------------------------------------------
+
+--Updates a comment's message
+CREATE PROCEDURE sp_update_comment
+    @id int,
+    @message varchar(MAX)
+AS
+ IF NOT EXISTS(SELECT * FROM comment WHERE id = @id)
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid comment')
+ ELSE
+    UPDATE comment SET message = @message WHERE id = @id
+GO
+
+---------------------------------------------------------------------------
+
+--Delete a comment
+CREATE PROCEDURE sp_delete_comment
+    @id int
+AS
+ IF NOT EXISTS(SELECT * FROM comment WHERE id = @id)
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid comment')
+ ELSE
+    DELETE FROM comment WHERE id = @id
+GO
+
+---------------------------------------------------------------------------
+
+--Creates a course
+CREATE PROCEDURE sp_create_course
+    @name varchar(50),
+    @shortname varchar(30),
+    @description varchar(300),
+    @area_name varchar(30)
+AS
+ IF NOT EXISTS(SELECT * FROM area WHERE name = @area_name)
+    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid area')
+ ELSE
+    INSERT INTO course values (@name, @shortname, @description, (SELECT id FROM area WHERE name = @area_name))
 GO
 
 ---------------------------------------------------------------------------
@@ -345,6 +415,30 @@ AS
     SELECT * FROM [user] where deleted = 0
  ELSE
     SELECT * FROM [user] where id = @id and deleted = 0
+GO
+
+---------------------------------------------------------------------------
+
+--Selects all the commments
+CREATE PROCEDURE sp_comments
+    @id AS int = 0
+AS
+ IF @id <= 0
+    SELECT * FROM comment
+ ELSE
+    SELECT * FROM comment where id = @id
+GO
+
+---------------------------------------------------------------------------
+
+--Selects all the courses
+CREATE PROCEDURE sp_courses
+    @id AS int = 0
+AS
+ IF @id <= 0
+    SELECT * FROM course
+ ELSE
+    SELECT * FROM course where id = @id
 GO
 
 ---------------------------------------------------------------------------
