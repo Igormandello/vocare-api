@@ -37,7 +37,9 @@ function ContainerManager() {
 
   this.deleteContainer = function() {
     return new Promise(async resolve => {
-      await this.connection.close();
+      if (this.connection)
+        await this.connection.close();
+        
       await this.container.delete({ force: true });
       console.log('Container deleted!');
       resolve();
