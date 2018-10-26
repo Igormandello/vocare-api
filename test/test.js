@@ -1,4 +1,5 @@
 const fs = require('fs');
+const sha256 = require('sha256');
 const ContainerManager = require('./ContainerManager');
 
 let cm = new ContainerManager();
@@ -397,7 +398,7 @@ describe('Posts endpoint tests', () => {
 		await cm.execSql('DBCC CHECKIDENT(\'user\', RESEED, 0)');
 		await cm.execSql('DBCC CHECKIDENT(\'area\', RESEED, 0)');
 		await cm.execSql('DBCC CHECKIDENT(\'post\', RESEED, 0)');
-		await cm.execSql('exec sp_register_user \'email@gmail.com\', \'password\', \'user1\'');
+		await cm.execSql('exec sp_register_user \'email@gmail.com\', ' + sha256('password') + ', \'user1\'');
 		await cm.execSql('INSERT INTO area VALUES (\'Valid Area 1\')');
 		await cm.execSql('INSERT INTO area VALUES (\'Valid Area 2\')');
 		await cm.closeConnection();
