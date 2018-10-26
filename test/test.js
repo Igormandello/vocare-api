@@ -1034,18 +1034,6 @@ describe('Comments endpoint tests', () => {
 			.end((err, res) => done(err));
 	});
 
-	it('should throw an error trying to add a comment from a nonexistent user', (done) => {
-		request.post('/api/comments/')
-			.set('Authorization', 'Bearer invalidToken')
-			.send({
-				post_id: 1,
-				user_id: 2,
-				message: 'test message'
-			})
-			.expect(400)
-			.end((err, res) => done(err));
-	});
-
 	it('should return 1 comment', (done) => {
 		request.get('/api/comments/')
 			.expect(200)
