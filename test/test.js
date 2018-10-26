@@ -853,7 +853,7 @@ describe('Post messages tests', () => {
 	});
 
 	it('should throw an error trying to get the comments with an invalid token', (done) => {
-		request.get('/api/posts/3/comments')
+		request.get('/api/posts/2/comments')
 			.set('Authorization', 'Bearer invalidToken')
 			.expect(401)
 			.end((err, res) => done(err));
@@ -969,10 +969,24 @@ describe('Comments endpoint tests', () => {
 		await cm.openConnection();
 		await cm.execSql('DBCC CHECKIDENT(\'area\', RESEED, 0)');
 		await cm.execSql('DBCC CHECKIDENT(\'comment\', RESEED, 0)');
-		await cm.execSql('exec sp_register_user \'email@gmail.com\', \'password\', \'user1\'');
+		await cm.execSql('exec sp_register_user \'email@gmail.com\', \'' + sha256('password') + '\', \'user1\'');
 		await cm.execSql('INSERT INTO area VALUES (\'Area 1\')');
 		await cm.execSql('INSERT INTO post VALUES (1, \'a\', \'b\', \'08-20-2018 12:15:00\', 1)');
 		await cm.closeConnection();
+	});
+
+	let user1AccessToken;
+	it('should get the user1 access token', (done) => {
+		request.post('/api/auth/login')
+			.send({
+				email: 'email@gmail.com',
+				password: 'password'
+			})
+			.expect(200)
+			.end((err, res) => {
+				user1AccessToken = res.body.access_token;
+				done(err);
+			});
 	});
 
 	it('should return 0 comments', (done) => {
@@ -986,6 +1000,7 @@ describe('Comments endpoint tests', () => {
 
 	it('should create a comment with message "test message"', (done) => {
 		request.post('/api/comments/')
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.send({
 				post_id: 1,
 				user_id: 1,
@@ -995,8 +1010,21 @@ describe('Comments endpoint tests', () => {
 			.end((err, res) => done(err));
 	});
 
+	it('should throw an error trying to add with an invalid token', (done) => {
+		request.post('/api/comments/')
+			.set('Authorization', 'Bearer invalidToken')
+			.send({
+				post_id: 1,
+				user_id: 1,
+				message: 'test message'
+			})
+			.expect(401)
+			.end((err, res) => done(err));
+	});
+
 	it('should throw an error trying to add to a nonexistent post', (done) => {
 		request.post('/api/comments/')
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.send({
 				post_id: 2,
 				user_id: 1,
@@ -1008,6 +1036,7 @@ describe('Comments endpoint tests', () => {
 
 	it('should throw an error trying to add a comment from a nonexistent user', (done) => {
 		request.post('/api/comments/')
+			.set('Authorization', 'Bearer invalidToken')
 			.send({
 				post_id: 1,
 				user_id: 2,
@@ -1028,10 +1057,21 @@ describe('Comments endpoint tests', () => {
 
 	it('should change the comment 1 message to "new test message"', (done) => {
 		request.put('/api/comments/1')
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.send({
 				message: 'new test message'
 			})
 			.expect(200)
+			.end((err, res) => done(err));
+	});
+
+	it('should throw an error trying to update with invalid token', (done) => {
+		request.put('/api/comments/1')
+			.set('Authorization', 'Bearer invalidToken')
+			.send({
+				message: 'new test message'
+			})
+			.expect(401)
 			.end((err, res) => done(err));
 	});
 
@@ -1050,8 +1090,16 @@ describe('Comments endpoint tests', () => {
 			.end((err, res) => done(err));
 	});
 
+	it('should throw an error trying to delete with an invalid token', (done) => {
+		request.delete('/api/comments/1')
+			.set('Authorization', 'Bearer invalidToken')
+			.expect(401)
+			.end((err, res) => done(err));
+	});
+
 	it('should delete the comment 1', (done) => {
 		request.delete('/api/comments/1')
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.expect(200)
 			.end((err, res) => done(err));
 	});
