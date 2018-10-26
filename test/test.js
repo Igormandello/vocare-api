@@ -802,7 +802,7 @@ describe('Post messages tests', () => {
 		await cm.execSql('DBCC CHECKIDENT(\'user\', RESEED, 0)');
 		await cm.execSql('DBCC CHECKIDENT(\'area\', RESEED, 0)');
 		await cm.execSql('DBCC CHECKIDENT(\'post\', RESEED, 0)');
-		await cm.execSql('exec sp_register_user \'email@gmail.com\', \'password\', \'user1\'');
+		await cm.execSql('exec sp_register_user \'email@gmail.com\', \'' + sha256('password') + '\', \'user1\'');
 		await cm.execSql('INSERT INTO area VALUES (\'Valid Area 1\')');
 		await cm.execSql('INSERT INTO post VALUES (1, \'a\', \'b\', \'08-20-2018 12:15:00\', 1)');
 		await cm.execSql('INSERT INTO post VALUES (1, \'a\', \'b\', \'08-20-2018 12:15:00\', 1)');
@@ -810,11 +810,23 @@ describe('Post messages tests', () => {
 		await cm.closeConnection();
 	});
 
+	let user1AccessToken;
+	it('should get the user1 access token', (done) => {
+		request.post('/api/auth/login')
+			.send({
+				email: 'email@gmail.com',
+				password: 'password'
+			})
+			.expect(200)
+			.end((err, res) => {
+				user1AccessToken = res.body.access_token;
+				done(err);
+			});
+	});
+
 	it('should return 0 comments in post 1', (done) => {
 		request.get('/api/posts/1/comments')
-			.send({
-				user_id: 1
-			})
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.expect(200)
 			.end((err, res) => {
 				expect(res.body.length).to.equal(0);
@@ -824,9 +836,7 @@ describe('Post messages tests', () => {
 
 	it('should return 1 comments in post 2', (done) => {
 		request.get('/api/posts/2/comments')
-			.send({
-				user_id: 1
-			})
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.expect(200)
 			.end((err, res) => {
 				expect(res.body.length).to.equal(1);
@@ -837,10 +847,15 @@ describe('Post messages tests', () => {
 
 	it('should throw an error trying to get the comments of a nonexistent post', (done) => {
 		request.get('/api/posts/3/comments')
-			.send({
-				user_id: 1
-			})
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should throw an error trying to get the comments with an invalid token', (done) => {
+		request.get('/api/posts/3/comments')
+			.set('Authorization', 'Bearer invalidToken')
+			.expect(401)
 			.end((err, res) => done(err));
 	});
 });
