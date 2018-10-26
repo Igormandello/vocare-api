@@ -2,6 +2,7 @@ const router = require('express').Router();
 const sha256 = require('sha256');
 const mssql = require('mssql');
 const { runSql } = require('../db');
+const { createToken, invalidate } = require('../middleware/auth');
 
 router.get('/', (req, res) => {
   runSql('exec sp_users').then((result) => {
@@ -40,6 +41,9 @@ router.get('/:id(\\d+)/messages', (req, res) => {
 });
 
 router.get('/:id(\\d+)/notifications', (req, res) => {
+  if (req.user != req.params.id)
+    return res.status(401).send();
+
   let offset = 0;
   if (req.body.page && req.body.page > 0)
     offset = 10 * req.body.page;
@@ -52,11 +56,15 @@ router.get('/:id(\\d+)/notifications', (req, res) => {
 });
 
 router.get('/:id(\\d+)/notifications/unreaden', (req, res) => {
+  if (req.user != req.params.id)
+    return res.status(401).send();
+
   runSql('exec sp_unreaden_notifications @id',
     { name: 'id', type: mssql.Int, value: req.params.id }
   ).then(result => res.send({ amount: result.recordset[0].amount }))
   .catch((e) => res.status(400).send(e));
 });
+
 router.post('/', (req, res) => {
   if (req.body.email && req.body.password)
     runSql('exec sp_register_user @email, @password, @username',
@@ -68,7 +76,8 @@ router.post('/', (req, res) => {
       res.status(201).send({
         id: result.id,
         username: result.username,
-        profile_picture: result.profile_picture
+        profile_picture: result.profile_picture,
+        access_token: createToken(result.id)
       });
     }).catch(e => res.status(400).send(e));
   else
@@ -81,12 +90,16 @@ router.post('/', (req, res) => {
       res.status(201).send({
         id: result.id,
         username: result.username,
-        profile_picture: result.profile_picture
+        profile_picture: result.profile_picture,
+        access_token: createToken(result.id)
       });
     }).catch(e => res.status(400).send(e));
 });
 
 router.put('/:id(\\d+)', (req, res) => {
+  if (req.user != req.params.id)
+    return res.status(401).send();
+
   runSql('exec sp_update_user @id, @email, @password, @username, @profile_picture',
     { name: 'id', type: mssql.Int, value: req.params.id },
     { name: 'email', type: mssql.VarChar(255), value: req.body.email },
@@ -98,9 +111,14 @@ router.put('/:id(\\d+)', (req, res) => {
 });
 
 router.delete('/:id(\\d+)', (req, res) => {
+  if (req.user != req.params.id)
+    return res.status(401).send();
+
   runSql('exec sp_delete_user @id',
     { name: 'id', type: mssql.Int, value: req.params.id }
-  ).then(() => res.status(200).send())
+  ).then(() => {
+    res.status(200).send()
+  })
   .catch(e => res.status(400).send(e));
 });
 

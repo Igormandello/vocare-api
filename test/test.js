@@ -70,6 +70,7 @@ describe('Users endpoint tests', () => {
 			});
 	});
 
+	let user1AccessToken;
 	it('should insert a user with email and password and return their id, username and profile picture', (done) => {
 		request.post('/api/users')
 			.send({
@@ -83,10 +84,12 @@ describe('Users endpoint tests', () => {
 				expect(res.body.id).to.equal(1);
 				expect(res.body.username).to.equal('user1');
 				expect(res.body.profile_picture).to.equal(null);
+				user1AccessToken = res.body.access_token;
 				done(err);
 			});
 	});
 
+	let user2AccessToken;
 	it('should insert a user without email and password and return their id, username and profile picture', (done) => {
 		request.post('/api/users')
 			.send({
@@ -100,6 +103,7 @@ describe('Users endpoint tests', () => {
 				expect(res.body.id).to.equal(2);
 				expect(res.body.username).to.equal('user2');
 				expect(res.body.profile_picture).to.equal(null);
+				user2AccessToken = res.body.access_token;
 				done(err);
 			});
 	});
@@ -129,6 +133,7 @@ describe('Users endpoint tests', () => {
 
 	it('should change the data from user with id 1', (done) => {
 		request.put('/api/users/1')
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.send({
 				email: 'newtestmail@gmail.com',
 				password: 'newExamplePassword',
@@ -139,7 +144,7 @@ describe('Users endpoint tests', () => {
 			.end((err, res) => done(err));
 	});
 
-	it('should throw an error trying to update an nonexistent user', (done) => {
+	it('should throw an error trying to update an user without token', (done) => {
 		request.put('/api/users/3')
 			.send({
 				email: 'newtestmail2@gmail.com',
@@ -147,12 +152,13 @@ describe('Users endpoint tests', () => {
 				username: 'newuser3',
 				profile_picture: null
 			})
-			.expect(400)
+			.expect(401)
 			.end((err, res) => done(err));
 	});
 
 	it('should throw an error trying to update the user with id 2 because the email already exists', (done) => {
 		request.put('/api/users/2')
+			.set('Authorization', 'Bearer ' + user2AccessToken)
 			.send({
 				email: 'newtestmail@gmail.com',
 				password: 'newExamplePassword',
@@ -191,13 +197,15 @@ describe('Users endpoint tests', () => {
 
 	it('should delete the user with id 2', (done) => {
 		request.delete('/api/users/2')
+			.set('Authorization', 'Bearer ' + user2AccessToken)
 			.expect(200)
 			.end(err => done(err));
 	});
 
-	it('should throw an error due to an invalid user id', (done) => {
+	it('should throw an error due to an invalid user token', (done) => {
 		request.delete('/api/users/3')
-			.expect(400)
+			.set('Authorization', 'Bearer ' + user1AccessToken)
+			.expect(401)
 			.end(err => done(err));
 	});
 
@@ -303,8 +311,23 @@ describe('User notifications tests', () => {
 		await cm.closeConnection();
 	});
 
+	let user1AccessToken;
+	it('should get the user1 access token', (done) => {
+		request.post('/api/auth/login')
+			.send({
+				email: 'newtestmail@gmail.com',
+				password: 'newExamplePassword'
+			})
+			.expect(200)
+			.end((err, res) => {
+				user1AccessToken = res.body.access_token;
+				done(err);
+			});
+	});
+
 	it('should return only 1 unreaden notification', (done) => {
 		request.get('/api/users/1/notifications/unreaden')
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.expect(200)
 			.end((err, res) => {
 				expect(res.body.amount).to.equal(1);
@@ -315,6 +338,7 @@ describe('User notifications tests', () => {
 
 	it('should return the 2 notifications', (done) => {
 		request.get('/api/users/1/notifications')
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.expect(200)
 			.end((err, res) => {
 				expect(res.body.length).to.equal(2);
@@ -325,6 +349,7 @@ describe('User notifications tests', () => {
 
 	it('should return no unreaden notifications', (done) => {
 		request.get('/api/users/1/notifications/unreaden')
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.expect(200)
 			.end((err, res) => {
 				expect(res.body.amount).to.equal(0);
