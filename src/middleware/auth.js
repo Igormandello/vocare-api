@@ -30,7 +30,10 @@ function invalidate(token, id) {
   if (valid_tokens[token] == id) {
     delete valid_tokens[token];
     delete valid_users[id];
+    return true;
   }
+
+  return false;
 }
 
 module.exports = {

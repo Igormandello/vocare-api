@@ -48,9 +48,8 @@ router.post('/logoff', (req, res) => {
     let token = req.body.access_token,
         id = req.body.id;
     
-    invalidate(token, id);
-    res.send();
-    return;
+    if (invalidate(token, id))
+      return res.send();
   }
 
   res.status(400).send();
