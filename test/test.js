@@ -222,7 +222,7 @@ describe('Auth endpoint tests', () => {
 
 	let user1AccessToken;
 	it('should login the "newuser1"', (done) => {
-		request.get('/api/auth/login')
+		request.post('/api/auth/login')
 			.send({
 				email: 'newtestmail@gmail.com',
 				password: 'newExamplePassword'
@@ -238,7 +238,7 @@ describe('Auth endpoint tests', () => {
 	});
 
 	it('should not login with email and password and throw an error', (done) => {
-		request.get('/api/auth/login')
+		request.post('/api/auth/login')
 			.send({
 				email: 'newtestmail@gmail.com',
 				password: 'randomPassword'
@@ -248,7 +248,7 @@ describe('Auth endpoint tests', () => {
 	});
 
 	it('should login the "user3"', (done) => {
-		request.get('/api/auth/login')
+		request.post('/api/auth/login')
 			.send({
 				provider: 'github',
 				access_token: 'generatedAccessToken:)'
@@ -263,7 +263,7 @@ describe('Auth endpoint tests', () => {
 	});
 
 	it('should not login with provider and access token and throw an error', (done) => {
-		request.get('/api/auth/login')
+		request.post('/api/auth/login')
 			.send({
 				provider: 'github',
 				access_token: 'wrongGeneratedAccessToken:('
@@ -273,7 +273,7 @@ describe('Auth endpoint tests', () => {
 	});
 
 	it('should logoff the user 1', (done) => {
-		request.get('/api/auth/logoff')
+		request.post('/api/auth/logoff')
 			.send({
 				access_token: user1AccessToken,
 				id: 1
@@ -283,7 +283,7 @@ describe('Auth endpoint tests', () => {
 	});
 
 	it('should throw an error trying to logoff user 3', (done) => {
-		request.get('/api/auth/logoff')
+		request.post('/api/auth/logoff')
 			.send({
 				access_token: 'fakeAccessToken',
 				id: 3

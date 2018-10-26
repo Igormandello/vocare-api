@@ -1,11 +1,10 @@
 const router = require('express').Router();
 const sha256 = require('sha256');
 const mssql = require('mssql');
-const crypto = require('crypto');
 const { runSql } = require('../db');
+const createToken = require('../middleware/auth').createToken;
 
-let valid_tokens = {};
-router.get('/login', (req, res) => {
+router.post('/login', (req, res) => {
   if (req.body.email && req.body.password)
     runSql('exec sp_user_login @email, @password',
       { name: 'email', type: mssql.VarChar(255), value: req.body.email },
@@ -44,7 +43,7 @@ router.get('/login', (req, res) => {
     }).catch((e) => res.status(400).send(e));
 });
 
-router.get('/logoff', (req, res) => {
+router.post('/logoff', (req, res) => {
   if (req.body.access_token && req.body.id) {
     let token = req.body.access_token,
         id = req.body.id;
@@ -58,12 +57,5 @@ router.get('/logoff', (req, res) => {
 
   res.status(400).send();
 });
-
-function createToken(id) {
-  let token = crypto.randomBytes(64).toString('hex');
-  valid_tokens[token] = id;
-
-  return token;
-}
 
 module.exports = router;
