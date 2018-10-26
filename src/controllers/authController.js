@@ -2,7 +2,7 @@ const router = require('express').Router();
 const sha256 = require('sha256');
 const mssql = require('mssql');
 const { runSql } = require('../db');
-const createToken = require('../middleware/auth').createToken;
+const { createToken, invalidate } = require('../middleware/auth');
 
 router.post('/login', (req, res) => {
   if (req.body.email && req.body.password)
@@ -47,12 +47,10 @@ router.post('/logoff', (req, res) => {
   if (req.body.access_token && req.body.id) {
     let token = req.body.access_token,
         id = req.body.id;
-
-    if (valid_tokens[token] == id) {
-      delete valid_tokens[token];
-      res.send();
-      return;
-    }
+    
+    invalidate(token, id);
+    res.send();
+    return;
   }
 
   res.status(400).send();

@@ -19,14 +19,22 @@ function createToken(id) {
   if (valid_users[id])
     delete valid_tokens[valid_users[id]];
 
-  let token = crypto.randomBytes(64).toString('hex');
+  let token = crypto.randomBytes(200).toString('hex');
   valid_tokens[token] = id;
 
   valid_users[id] = token;
   return token;
 }
 
+function invalidate(token, id) {
+  if (valid_tokens[token] == id) {
+    delete valid_tokens[token];
+    delete valid_users[id];
+  }
+}
+
 module.exports = {
   checkAuth,
-  createToken
+  createToken,
+  invalidate
 };
