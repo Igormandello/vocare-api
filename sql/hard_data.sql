@@ -36,22 +36,22 @@ insert into [user] values ('igormandello@gmail.com',
 						   'bf9914a2967c5db5c70a3f16039b75e5edbb949a74bc370f6920aebe96e29e1b', 
 						   'Igor Mandello',
 						   3,
-						   NULL)
+						   NULL, 0)
 insert into [user] values ('vitorbartier@hotmail.com', 
 						   'bf9914a2967c5db5c70a3f16039b75e5edbb949a74bc370f6920aebe96e29e1b', 
 						   'Vitor Bartier',
 						   3,
-						   NULL)
+						   NULL, 0)
 insert into [user] values ('lucashideki@gmail.com', 
 						   'bf9914a2967c5db5c70a3f16039b75e5edbb949a74bc370f6920aebe96e29e1b', 
 						   'Lucas Hideki',
 						   4,
-						   NULL)
+						   NULL, 0)
 insert into [user] values ('lucasvvop@gmail.com', 
 						   'bf9914a2967c5db5c70a3f16039b75e5edbb949a74bc370f6920aebe96e29e1b', 
 						   'Lucas Valente',
 						   3,
-						   NULL)
+						   NULL, 0)
 
 ---------------------------------------------------------
 
