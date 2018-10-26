@@ -44,13 +44,13 @@ CREATE PROCEDURE sp_update_user
 AS
  IF NOT EXISTS(SELECT * FROM [user] WHERE id = @id)
  BEGIN
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid user')
+    RAISERROR ('%s', 16, 1, 'Invalid user')
     RETURN
  END
 
  IF EXISTS(SELECT * FROM [user] WHERE email = @email and id <> @id)
  BEGIN
-    RAISERROR ('%d: %s', 16, 1, 100, 'This email is already in use')
+    RAISERROR ('%s', 16, 1, 'This email is already in use')
     RETURN
  END
 
@@ -68,7 +68,7 @@ CREATE PROCEDURE sp_delete_user
 AS
  IF NOT EXISTS(SELECT * FROM [user] WHERE id = @id)
  BEGIN
-    RAISERROR ('%d: %s', 16, 1, 100, 'This user id does not exist')
+    RAISERROR ('%s', 16, 1, 'This user id does not exist')
     RETURN
  END
 
@@ -90,7 +90,7 @@ AS
     SELECT id FROM provider WHERE name = @provider
  ))
  BEGIN
-    RAISERROR ('%d: %s', 16, 1, 100, 'This account is already registered')
+    RAISERROR ('%s', 16, 1, 'This account is already registered')
     RETURN
  END
     
@@ -114,7 +114,7 @@ CREATE PROCEDURE sp_register_user
 AS
  IF EXISTS(SELECT * FROM [user] WHERE email = @email)
  BEGIN
-    RAISERROR ('%d: %s', 16, 1, 100, 'This email is already registered')
+    RAISERROR ('%s', 16, 1, 'This email is already registered')
     RETURN
  END
     
@@ -130,7 +130,7 @@ CREATE PROCEDURE sp_unreaden_notifications
 AS
  IF NOT EXISTS(SELECT * FROM [user] WHERE id = @id)
  BEGIN
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid user')
+    RAISERROR ('%s', 16, 1, 'Invalid user')
     RETURN
  END
 
@@ -147,7 +147,7 @@ CREATE PROCEDURE sp_user_notifications
 AS
  IF NOT EXISTS(SELECT * FROM [user] WHERE id = @id)
  BEGIN
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid user')
+    RAISERROR ('%s', 16, 1, 'Invalid user')
     RETURN
  END
 
@@ -178,13 +178,13 @@ CREATE PROCEDURE sp_post_comments
 AS
  IF NOT EXISTS(SELECT * FROM post WHERE id = @id)
  BEGIN
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid post')
+    RAISERROR ('%s', 16, 1, 'Invalid post')
     RETURN
  END
 
  IF NOT EXISTS(SELECT * FROM [user] WHERE id = @user_id)
  BEGIN
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid user')
+    RAISERROR ('%s', 16, 1, 'Invalid user')
     RETURN
  END
  
@@ -205,13 +205,13 @@ CREATE PROCEDURE sp_edit_post
 AS
  IF NOT EXISTS(SELECT * FROM post WHERE id = @id)
  BEGIN
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid post')
+    RAISERROR ('%s', 16, 1, 'Invalid post')
     RETURN
  END
 
  IF NOT EXISTS(SELECT * FROM area WHERE name = @newArea)
  BEGIN
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid area')
+    RAISERROR ('%s', 16, 1, 'Invalid area')
     RETURN
  END
 
@@ -229,7 +229,7 @@ CREATE PROCEDURE sp_post_create
 AS
  IF NOT EXISTS(SELECT * FROM area WHERE name = @area)
  BEGIN
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid area')
+    RAISERROR ('%s', 16, 1, 'Invalid area')
     RETURN
  END
 
@@ -245,7 +245,7 @@ CREATE PROCEDURE sp_delete_post
 AS
  IF NOT EXISTS(SELECT * FROM post WHERE id = @id)
  BEGIN
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid post id')
+    RAISERROR ('%s', 16, 1, 'Invalid post id')
     RETURN
  END
 
@@ -263,9 +263,9 @@ CREATE PROCEDURE sp_add_tag
     @tag varchar(30)
 AS
  IF NOT EXISTS(SELECT * FROM post WHERE id = @post_id)
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid post')
+    RAISERROR ('%s', 16, 1, 'Invalid post')
  ELSE IF NOT EXISTS(SELECT * FROM tag WHERE name = @tag)
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid tag')
+    RAISERROR ('%s', 16, 1, 'Invalid tag')
  ELSE
     INSERT INTO post_tag values (@post_id, (SELECT id FROM tag WHERE name = @tag))
 GO
@@ -278,9 +278,9 @@ CREATE PROCEDURE sp_remove_tag
     @tag varchar(30)
 AS
  IF NOT EXISTS(SELECT * FROM post WHERE id = @post_id)
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid post')
+    RAISERROR ('%s', 16, 1, 'Invalid post')
  ELSE IF NOT EXISTS(SELECT * FROM tag WHERE name = @tag)
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid tag')
+    RAISERROR ('%s', 16, 1, 'Invalid tag')
  ELSE
     DELETE FROM post_tag WHERE post_id = @post_id and tag_id = (SELECT id FROM tag WHERE name = @tag)
 GO
@@ -292,7 +292,7 @@ CREATE PROCEDURE sp_post_tags
     @post_id int
 AS
  IF NOT EXISTS(SELECT * FROM post WHERE id = @post_id)
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid post')
+    RAISERROR ('%s', 16, 1, 'Invalid post')
  ELSE
     SELECT name FROM tag WHERE id IN (SELECT tag_id from post_tag WHERE post_id = @post_id)
 GO
@@ -304,7 +304,7 @@ CREATE PROCEDURE sp_create_tag
     @name varchar(30)
 AS
  IF EXISTS(SELECT * FROM tag WHERE UPPER(name) = UPPER(@name))
-    RAISERROR ('%d: %s', 16, 1, 100, 'Existent tag')
+    RAISERROR ('%s', 16, 1, 'Existent tag')
  ELSE
     INSERT INTO tag VALUES (@name)
 GO
@@ -318,9 +318,9 @@ CREATE PROCEDURE sp_comment_create
     @message varchar(MAX)
 AS
  IF NOT EXISTS(SELECT * FROM post WHERE id = @post_id)
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid post')
+    RAISERROR ('%s', 16, 1, 'Invalid post')
  ELSE IF NOT EXISTS(SELECT * FROM [user] WHERE id = @user_id)
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid user')
+    RAISERROR ('%s', 16, 1, 'Invalid user')
  ELSE
     INSERT INTO comment values (@post_id, @user_id, @message, (SELECT GETDATE()))
 GO
@@ -330,10 +330,13 @@ GO
 --Updates a comment's message
 CREATE PROCEDURE sp_update_comment
     @id int,
-    @message varchar(MAX)
+    @message varchar(MAX),
+	@user_id int
 AS
  IF NOT EXISTS(SELECT * FROM comment WHERE id = @id)
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid comment')
+    RAISERROR ('%s', 16, 1, 'Invalid comment')
+ ELSE IF NOT EXISTS(SELECT * FROM comment WHERE id = @id and user_id = @user_id)
+    RAISERROR ('%s', 16, 2, 'Not allowed')
  ELSE
     UPDATE comment SET message = @message WHERE id = @id
 GO
@@ -345,7 +348,7 @@ CREATE PROCEDURE sp_delete_comment
     @id int
 AS
  IF NOT EXISTS(SELECT * FROM comment WHERE id = @id)
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid comment')
+    RAISERROR ('%s', 16, 1, 'Invalid comment')
  ELSE
     DELETE FROM comment WHERE id = @id
 GO
@@ -360,7 +363,7 @@ CREATE PROCEDURE sp_create_course
     @area_name varchar(30)
 AS
  IF NOT EXISTS(SELECT * FROM area WHERE name = @area_name)
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid area')
+    RAISERROR ('%s', 16, 1, 'Invalid area')
  ELSE
     INSERT INTO course values (@name, @shortname, @description, (SELECT id FROM area WHERE name = @area_name))
 GO
@@ -374,7 +377,7 @@ CREATE PROCEDURE sp_filter_courses
     @area varchar(30)
 AS
  IF NOT EXISTS(SELECT * FROM area WHERE name = @area)
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid area')
+    RAISERROR ('%s', 16, 1, 'Invalid area')
  ELSE
     SELECT TOP(@amount) * FROM (
         SELECT ROW_NUMBER() OVER(ORDER BY name) AS number, * FROM course WHERE area_id = (SELECT id FROM area WHERE name = @area)
@@ -448,7 +451,7 @@ CREATE PROCEDURE sp_post_views
 AS
  IF NOT EXISTS(SELECT * FROM post WHERE id = @id)
  BEGIN
-    RAISERROR ('%d: %s', 16, 1, 100, 'Invalid post id')
+    RAISERROR ('%s', 16, 1, 'Invalid post id')
     RETURN
  END
 
