@@ -75,19 +75,21 @@ router.post('/:id(\\d+)/tags', async (req, res) => {
   if (Array.isArray(req.body.tags)) {
     let error = false;
     for (let i = 0; i < req.body.tags.length && !error; i++)
-      await runSql('exec sp_add_tag @id, @tag', 
+      await runSql('exec sp_add_tag @id, @tag, @user_id', 
         { name: 'id', type: mssql.Int, value: req.params.id },
-        { name: 'tag', type: mssql.VarChar(30), value: req.body.tags[i] }
-      ).catch((e) => { error = true; res.status(400).send(e); });
+        { name: 'tag', type: mssql.VarChar(30), value: req.body.tags[i] },
+        { name: 'user_id', type: mssql.Int, value: req.user }
+      ).catch((e) => { error = true; res.status(errors[e.state - 1]).send(e.originalError.info.message); });
 
     if (!error)
       res.status(201).send();
   } else if (req.body.tags)
-    runSql('exec sp_add_tag @id, @tag',
+    runSql('exec sp_add_tag @id, @tag, @user_id',
       { name: 'id', type: mssql.Int, value: req.params.id },
-      { name: 'tag', type: mssql.VarChar(30), value: req.body.tags }
+      { name: 'tag', type: mssql.VarChar(30), value: req.body.tags },
+      { name: 'user_id', type: mssql.Int, value: req.user }
     ).then(() => res.status(201).send())
-    .catch((e) => res.status(400).send(e));
+    .catch((e) => res.status(errors[e.state - 1]).send(e.originalError.info.message));
   else
     res.status(400).send();
 });
@@ -114,19 +116,21 @@ router.delete('/:id(\\d+)/tags', async (req, res) => {
   if (Array.isArray(req.body.tags)) {
     let error = false;
     for (let i = 0; i < req.body.tags.length && !error; i++)
-      await runSql('exec sp_remove_tag @id, @tag', 
+      await runSql('exec sp_remove_tag @id, @tag, @user_id', 
         { name: 'id', type: mssql.Int, value: req.params.id },
-        { name: 'tag', type: mssql.VarChar(30), value: req.body.tags[i] }
-      ).catch((e) => { error = true; res.status(400).send(e); });
+        { name: 'tag', type: mssql.VarChar(30), value: req.body.tags[i] },
+        { name: 'user_id', type: mssql.Int, value: req.user }
+      ).catch((e) => { error = true; res.status(errors[e.state - 1]).send(e.originalError.info.message); });
 
     if (!error)
       res.status(200).send();
   } else if (req.body.tags)
-    runSql('exec sp_remove_tag @id, @tag',
+    runSql('exec sp_remove_tag @id, @tag, @user_id',
       { name: 'id', type: mssql.Int, value: req.params.id },
-      { name: 'tag', type: mssql.VarChar(30), value: req.body.tags }
+      { name: 'tag', type: mssql.VarChar(30), value: req.body.tags },
+      { name: 'user_id', type: mssql.Int, value: req.user }
     ).then(() => res.status(200).send())
-    .catch((e) => res.status(400).send(e));
+    .catch(e => res.status(errors[e.state - 1]).send(e.originalError.info.message));
   else
     res.status(400).send();
 });

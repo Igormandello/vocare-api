@@ -267,12 +267,15 @@ GO
 --Adds a tag to a post
 CREATE PROCEDURE sp_add_tag
     @post_id int,
-    @tag varchar(30)
+    @tag varchar(30),
+    @user_id int
 AS
  IF NOT EXISTS(SELECT * FROM post WHERE id = @post_id)
     RAISERROR ('%s', 16, 1, 'Invalid post')
  ELSE IF NOT EXISTS(SELECT * FROM tag WHERE name = @tag)
     RAISERROR ('%s', 16, 1, 'Invalid tag')
+ ELSE IF NOT EXISTS(SELECT * FROM post WHERE id = @post_id and user_id = @user_id)
+    RAISERROR ('%s', 16, 2, 'Not Allowed')
  ELSE
     INSERT INTO post_tag values (@post_id, (SELECT id FROM tag WHERE name = @tag))
 GO
@@ -282,12 +285,15 @@ GO
 --Removes a tag from a post
 CREATE PROCEDURE sp_remove_tag
     @post_id int,
-    @tag varchar(30)
+    @tag varchar(30),
+    @user_id int
 AS
  IF NOT EXISTS(SELECT * FROM post WHERE id = @post_id)
     RAISERROR ('%s', 16, 1, 'Invalid post')
  ELSE IF NOT EXISTS(SELECT * FROM tag WHERE name = @tag)
     RAISERROR ('%s', 16, 1, 'Invalid tag')
+ ELSE IF NOT EXISTS(SELECT * FROM post WHERE id = @post_id and user_id = @user_id)
+    RAISERROR ('%s', 16, 2, 'Not Allowed')
  ELSE
     DELETE FROM post_tag WHERE post_id = @post_id and tag_id = (SELECT id FROM tag WHERE name = @tag)
 GO

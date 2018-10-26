@@ -584,7 +584,7 @@ describe('Posts endpoint tests', () => {
 	});
 
 	it('should throw an error trying to delete with an invalid token', (done) => {
-		request.delete('/api/posts/1')
+		request.delete('/api/posts/2')
 			.set('Authorization', 'Bearer invalidToken')
 			.expect(401)
 			.end((err, res) => done(err));
@@ -658,6 +658,20 @@ describe('Post tags tests', () => {
 		await cm.closeConnection();
 	});
 
+	let user1AccessToken;
+	it('should get the user1 access token', (done) => {
+		request.post('/api/auth/login')
+			.send({
+				email: 'email@gmail.com',
+				password: 'password'
+			})
+			.expect(200)
+			.end((err, res) => {
+				user1AccessToken = res.body.access_token;
+				done(err);
+			});
+	});
+
 	it('should throw an error trying to access the tags of a nonexistent post', (done) => {
 		request.get('/api/posts/4/tags')
 			.expect(400)
@@ -675,12 +689,27 @@ describe('Post tags tests', () => {
 
 	it('should throw an error trying to add a tag in a nonexistent post', (done) => {
 		request.post('/api/posts/4/tags')
+			.send({
+				tags: 'Tag 1'
+			})
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should throw an error trying to add a tag with an invalid token', (done) => {
+		request.post('/api/posts/2/tags')
+			.send({
+				tags: 'Tag 1'
+			})
+			.set('Authorization', 'Bearer invalidToken')
+			.expect(401)
 			.end((err, res) => done(err));
 	});
 
 	it('should add the tags "Tag 1", "Tag 2" and "Tag 3" in post 2', (done) => {
 		request.post('/api/posts/2/tags')
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.send({
 				tags: [
 					'Tag 1',
@@ -694,6 +723,7 @@ describe('Post tags tests', () => {
 
 	it('should add the tag "Tag 3" post 3', (done) => {
 		request.post('/api/posts/3/tags')
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.send({
 				tags: 'Tag 3'
 			})
@@ -721,6 +751,7 @@ describe('Post tags tests', () => {
 
 	it('should delete the tags "Tag 1" and "Tag 2" in post 2', (done) => {
 		request.delete('/api/posts/2/tags')
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.send({
 				tags: [
 					'Tag 1',
@@ -731,8 +762,19 @@ describe('Post tags tests', () => {
 			.end((err, res) => done(err));
 	});
 
+	it('should throw an error trying to delete a tag with an invalid token', (done) => {
+		request.post('/api/posts/3/tags')
+			.send({
+				tags: 'Tag 3'
+			})
+			.set('Authorization', 'Bearer invalidToken')
+			.expect(401)
+			.end((err, res) => done(err));
+	});
+
 	it('should delete the tag "Tag 3" in post 3', (done) => {
 		request.delete('/api/posts/3/tags')
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.send({
 				tags: 'Tag 3'
 			})
