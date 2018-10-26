@@ -20,15 +20,17 @@ function createToken(id) {
     delete valid_tokens[valid_users[id]];
 
   let token = crypto.randomBytes(200).toString('hex');
-  valid_tokens[token] = id;
+  while (valid_tokens[token])
+    token = crypto.randomBytes(200).toString('hex');
 
+  valid_tokens[token] = id;
   valid_users[id] = token;
   return token;
 }
 
-function invalidate(token, id) {
-  if (valid_tokens[token] == id) {
-    delete valid_tokens[token];
+function invalidate(id) {
+  if (valid_users[id]) {
+    delete valid_tokens[valid_users[id]];
     delete valid_users[id];
     return true;
   }

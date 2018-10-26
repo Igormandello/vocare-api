@@ -282,8 +282,8 @@ describe('Auth endpoint tests', () => {
 
 	it('should logoff the user 1', (done) => {
 		request.post('/api/auth/logoff')
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.send({
-				access_token: user1AccessToken,
 				id: 1
 			})
 			.expect(200)
@@ -292,11 +292,11 @@ describe('Auth endpoint tests', () => {
 
 	it('should throw an error trying to logoff user 3', (done) => {
 		request.post('/api/auth/logoff')
+			.set('Authorization', 'Bearer ' + 'randomToken')
 			.send({
-				access_token: 'fakeAccessToken',
 				id: 3
 			})
-			.expect(400)
+			.expect(401)
 			.end((err, res) => done(err));
 	});
 });

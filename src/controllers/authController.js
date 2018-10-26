@@ -44,15 +44,11 @@ router.post('/login', (req, res) => {
 });
 
 router.post('/logoff', (req, res) => {
-  if (req.body.access_token && req.body.id) {
-    let token = req.body.access_token,
-        id = req.body.id;
-    
-    if (invalidate(token, id))
-      return res.send();
-  }
-
-  res.status(400).send();
+  if (req.user != req.params.id)
+    return res.status(401).send();
+  
+  if (invalidate(req.user))
+    return res.send();
 });
 
 module.exports = router;
