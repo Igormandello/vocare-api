@@ -201,7 +201,8 @@ CREATE PROCEDURE sp_edit_post
     @id int,
     @newTitle varchar(100),
     @newMessage varchar(MAX),
-    @newArea varchar(30)
+    @newArea varchar(30),
+	@user_id int
 AS
  IF NOT EXISTS(SELECT * FROM post WHERE id = @id)
  BEGIN
@@ -213,6 +214,12 @@ AS
  BEGIN
     RAISERROR ('%s', 16, 1, 'Invalid area')
     RETURN
+ END
+
+ IF NOT EXISTS(SELECT * FROM post WHERE id = @id and user_id = @user_id)
+ BEGIN
+    RAISERROR ('%s : %d', 16, 2, 'Not allowed', @user_id)
+	RETURN
  END
 
  UPDATE post SET title = @newTitle, message = @newMessage, area_id = (SELECT id FROM area WHERE name = @newArea) WHERE id = @id

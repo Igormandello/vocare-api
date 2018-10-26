@@ -3,6 +3,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 var app = express();
 
+global.errors = [
+  400,
+  401
+];
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(require('./middleware/auth').checkAuth);

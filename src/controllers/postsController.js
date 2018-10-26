@@ -54,6 +54,9 @@ router.get('/:id(\\d+)/comments', (req, res) => {
 });
 
 router.post('/', (req, res) => {
+  if (req.user != req.body.user_id)
+    return res.status(401).send();
+
   runSql('exec sp_post_create @user_id, @title, @message, @area',
     { name: 'user_id', type: mssql.Int, value: req.body.user_id },
     { name: 'title', type: mssql.VarChar(100), value: req.body.title },
@@ -65,7 +68,7 @@ router.post('/', (req, res) => {
       id: obj.id,
       area_id: obj.area_id
     });
-  }).catch((e) => res.status(400).send(e));
+  }).catch((e) => res.status(400).send(e.originalError.info.message));
 });
 
 router.post('/:id(\\d+)/tags', async (req, res) => {
@@ -90,13 +93,14 @@ router.post('/:id(\\d+)/tags', async (req, res) => {
 });
 
 router.put('/:id(\\d+)', (req, res) => {
-  runSql('exec sp_edit_post @id, @title, @message, @area',
+  runSql('exec sp_edit_post @id, @title, @message, @area, @user_id',
     { name: 'id', type: mssql.Int, value: req.params.id },
     { name: 'title', type: mssql.VarChar(100), value: req.body.title },
     { name: 'message', type: mssql.VarChar(mssql.MAX), value: req.body.message },
     { name: 'area', type: mssql.VarChar(30), value: req.body.area },
+    { name: 'user_id', type: mssql.Int, value: req.user }
   ).then(() => res.status(200).send())
-  .catch(e => res.status(400).send(e));
+  .catch(e => res.status(errors[e.state - 1]).send(e.originalError.info.message));
 });
 
 router.delete('/:id(\\d+)', (req, res) => {
