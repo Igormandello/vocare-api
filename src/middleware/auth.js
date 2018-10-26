@@ -2,6 +2,8 @@ const crypto = require('crypto');
 
 let valid_tokens = {}, valid_users = {};
 function checkAuth(req, res, next) {
+  req.user = -1;
+  
   if (req.headers.authorization) {
     let auth = req.headers.authorization.split(' ');
 
