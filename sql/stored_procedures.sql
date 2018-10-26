@@ -184,7 +184,7 @@ AS
 
  IF NOT EXISTS(SELECT * FROM [user] WHERE id = @user_id)
  BEGIN
-    RAISERROR ('%s', 16, 1, 'Invalid user')
+    RAISERROR ('%s', 16, 2, 'Not Allowed')
     RETURN
  END
  
@@ -248,11 +248,18 @@ GO
 
 --Deletes the post from database
 CREATE PROCEDURE sp_delete_post
-    @id int
+    @id int,
+    @user_id int
 AS
  IF NOT EXISTS(SELECT * FROM post WHERE id = @id)
  BEGIN
     RAISERROR ('%s', 16, 1, 'Invalid post id')
+    RETURN
+ END
+
+ IF NOT EXISTS(SELECT * FROM post WHERE id = @id and user_id = @user_id)
+ BEGIN
+    RAISERROR ('%s', 16, 2, 'Not Allowed')
     RETURN
  END
 

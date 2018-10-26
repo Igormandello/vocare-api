@@ -48,9 +48,9 @@ router.get('/:id(\\d+)/tags', (req, res) => {
 router.get('/:id(\\d+)/comments', (req, res) => {
   runSql('exec sp_post_comments @id, @user_id',
     { name: 'id', type: mssql.Int, value: req.params.id },
-    { name: 'user_id', type: mssql.Int, value: req.body.user_id }
+    { name: 'user_id', type: mssql.Int, value: req.user }
   ).then((result) => res.send(result.recordset))
-  .catch((e) => res.status(400).send(e));
+  .catch((e) => res.status(errors[e.state - 1]).send(e.originalError.info.message));
 });
 
 router.post('/', (req, res) => {
@@ -106,10 +106,11 @@ router.put('/:id(\\d+)', (req, res) => {
 });
 
 router.delete('/:id(\\d+)', (req, res) => {
-  runSql('exec sp_delete_post @id',
-    { name: 'id', type: mssql.Int, value: req.params.id }
+  runSql('exec sp_delete_post @id, @user_id',
+    { name: 'id', type: mssql.Int, value: req.params.id },
+    { name: 'user_id', type: mssql.Int, value: req.user }
   ).then(() => res.status(200).send())
-  .catch(e => res.status(400).send(e));
+  .catch(e => res.status(errors[e.state - 1]).send(e.originalError.info.message));
 });
 
 router.delete('/:id(\\d+)/tags', async (req, res) => {
