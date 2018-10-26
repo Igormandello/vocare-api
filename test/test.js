@@ -403,6 +403,20 @@ describe('Posts endpoint tests', () => {
 		await cm.closeConnection();
 	});
 
+	let user1AccessToken;
+	it('should get the user1 access token', (done) => {
+		request.post('/api/auth/login')
+			.send({
+				email: 'email@gmail.com',
+				password: 'password'
+			})
+			.expect(200)
+			.end((err, res) => {
+				user1AccessToken = res.body.access_token;
+				done(err);
+			});
+	});
+
 	it('should return 0 posts', (done) => {
 		request.get('/api/posts')
 			.expect(200)
@@ -414,6 +428,7 @@ describe('Posts endpoint tests', () => {
 
 	it('should create a post with the area "Valid Area 1" and return its id and its area_id', (done) => {
 		request.post('/api/posts')
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.send({
 				user_id: 1,
 				title: 'post title 1',
@@ -430,6 +445,7 @@ describe('Posts endpoint tests', () => {
 
 	it('should create a post with the area "Valid Area 2" and return its id and its area_id', (done) => {
 		request.post('/api/posts')
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.send({
 				user_id: 1,
 				title: 'post title 2',
@@ -446,6 +462,7 @@ describe('Posts endpoint tests', () => {
 
 	it('should throw an error trying to create a post with an invalid area', (done) => {
 		request.post('/api/posts')
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.send({
 				user_id: 1,
 				title: 'post title',
@@ -453,6 +470,19 @@ describe('Posts endpoint tests', () => {
 				area: 'invalid area'
 			})
 			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should throw an error trying to create a with an invalid user token', (done) => {
+		request.post('/api/posts')
+			.set('Authorization', 'Bearer ' + user1AccessToken)
+			.send({
+				user_id: 2,
+				title: 'post title',
+				message: 'post message',
+				area: 'Valid Area 1'
+			})
+			.expect(401)
 			.end((err, res) => done(err));
 	});
 
@@ -477,6 +507,7 @@ describe('Posts endpoint tests', () => {
 
 	it('should update the post title of post with id 1 to "new post title"', (done) => {
 		request.put('/api/posts/1')
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.send({
 				title: 'new post title',
 				message: 'new post message',
@@ -488,6 +519,7 @@ describe('Posts endpoint tests', () => {
 
 	it('should throw an error trying to update a post to an invalid area', (done) => {
 		request.put('/api/posts/1')
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.send({
 				title: 'post title',
 				message: 'post message',
@@ -499,12 +531,25 @@ describe('Posts endpoint tests', () => {
 
 	it('should throw an error trying to update an invalid post', (done) => {
 		request.put('/api/posts/3')
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.send({
 				title: 'new post title',
 				message: 'new post message',
 				area: 'Valid Area 1'
 			})
 			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should throw an error trying to update with an invalid token', (done) => {
+		request.put('/api/posts/1')
+			.set('Authorization', 'Bearer invalidToken')
+			.send({
+				title: 'new post title',
+				message: 'new post message',
+				area: 'Valid Area 1'
+			})
+			.expect(401)
 			.end((err, res) => done(err));
 	});
 
@@ -526,6 +571,7 @@ describe('Posts endpoint tests', () => {
 
 	it('should delete the post with id 1', (done) => {
 		request.delete('/api/posts/1')
+			.set('Authorization', 'Bearer ' + user1AccessToken)
 			.expect(200)
 			.end((err, res) => done(err));
 	});
@@ -533,6 +579,13 @@ describe('Posts endpoint tests', () => {
 	it('should throw an error trying to delete an invalid post', (done) => {
 		request.delete('/api/posts/1')
 			.expect(400)
+			.end((err, res) => done(err));
+	});
+
+	it('should throw an error trying to delete with an invalid token', (done) => {
+		request.delete('/api/posts/1')
+			.set('Authorization', 'Bearer invalidToken')
+			.expect(401)
 			.end((err, res) => done(err));
 	});
 
