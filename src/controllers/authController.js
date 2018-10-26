@@ -44,11 +44,13 @@ router.post('/login', (req, res) => {
 });
 
 router.post('/logoff', (req, res) => {
-  if (req.user != req.params.id)
+  if (req.user != req.body.id)
     return res.status(401).send();
   
   if (invalidate(req.user))
     return res.send();
+
+  return res.status(500).send();
 });
 
 module.exports = router;
