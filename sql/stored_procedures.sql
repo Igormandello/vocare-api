@@ -365,10 +365,13 @@ GO
 
 --Delete a comment
 CREATE PROCEDURE sp_delete_comment
-    @id int
+    @id int,
+    @user_id int
 AS
  IF NOT EXISTS(SELECT * FROM comment WHERE id = @id)
     RAISERROR ('%s', 16, 1, 'Invalid comment')
+ ELSE IF NOT EXISTS(SELECT * FROM comment WHERE id = @id and user_id = @user_id)
+    RAISERROR ('%s', 16, 2, 'Not allowed')
  ELSE
     DELETE FROM comment WHERE id = @id
 GO
