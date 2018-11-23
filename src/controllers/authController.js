@@ -43,7 +43,7 @@ router.post('/login', (req, res) => {
     }).catch((e) => res.status(400).send(e));
 });
 
-router.post('/logoff', (req, res) => {
+router.post('/logout', (req, res) => {
   if (req.user != req.body.id)
     return res.status(401).send();
   
