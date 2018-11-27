@@ -40,8 +40,13 @@ function invalidate(id) {
   return false;
 }
 
+function getToken(id) {
+  return valid_users[id];
+}
+
 module.exports = {
   checkAuth,
   createToken,
-  invalidate
+  invalidate,
+  getToken
 };

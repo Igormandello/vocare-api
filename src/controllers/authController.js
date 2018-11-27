@@ -2,7 +2,7 @@ const router = require('express').Router();
 const sha256 = require('sha256');
 const mssql = require('mssql');
 const { runSql } = require('../db');
-const { createToken, invalidate } = require('../middleware/auth');
+const { createToken, invalidate, getToken } = require('../middleware/auth');
 
 router.post('/login', (req, res) => {
   if (req.body.email && req.body.password)
@@ -43,6 +43,29 @@ router.post('/login', (req, res) => {
         access_token: createToken(obj.id)
       });
     }).catch((e) => res.status(400).send(e));
+});
+
+router.post('/verify', (req, res) => {
+  if (req.user != req.body.id)
+    return res.status(401).send();
+
+  runSql('exec sp_users @id',
+    { name: 'id', type: mssql.Int, value: req.body.id }
+  ).then((result) => {
+    if (result.recordset.length == 0) {
+      res.status(400).send();
+      return;
+    }
+
+    let obj = result.recordset[0];
+    res.send({
+      id: obj.id,
+      username: obj.username,
+      level: obj.level,
+      profile_picture: obj.profile_picture,
+      access_token: getToken(obj.id)
+    });
+  });
 });
 
 router.post('/logout', (req, res) => {
