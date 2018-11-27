@@ -19,6 +19,7 @@ router.post('/login', (req, res) => {
       res.send({
         id: obj.id,
         username: obj.username,
+        level: obj.level,
         profile_picture: obj.profile_picture,
         access_token: createToken(obj.id)
       });
@@ -37,6 +38,7 @@ router.post('/login', (req, res) => {
       res.send({
         id: obj.id,
         username: obj.username,
+        level: obj.level,
         profile_picture: obj.profile_picture,
         access_token: createToken(obj.id)
       });

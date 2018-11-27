@@ -10,7 +10,7 @@ router.get('/', (req, res) => {
       return {
         id: obj.id,
         username: obj.username,
-        profile_picture: obj.profile_picture
+        level: obj.level
       }
     }));
   });
@@ -29,7 +29,7 @@ router.get('/:id(\\d+)', (req, res) => {
     res.send({
       id: obj.id,
       username: obj.username,
-      profile_picture: obj.profile_picture
+      level: obj.level
     });
   });
 });
@@ -45,9 +45,11 @@ router.get('/:id(\\d+)/notifications', (req, res) => {
     return res.status(401).send();
 
   let offset = 0;
-  if (req.body.page && req.body.page > 0)
-    offset = 10 * req.body.page;
+  let page = req.param('page') || 0;
+  if (page && page > 0)
+    offset = 10 * page;
 
+  console.log(offset, page);
   runSql('exec sp_user_notifications @id, @offset, 10',
     { name: 'id', type: mssql.Int, value: req.params.id },
     { name: 'offset', type: mssql.Int, value: offset }
