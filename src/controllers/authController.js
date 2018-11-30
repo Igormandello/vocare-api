@@ -61,6 +61,7 @@ router.post('/verify', (req, res) => {
     res.send({
       id: obj.id,
       username: obj.username,
+      email: obj.email,
       level: obj.level,
       profile_picture: obj.profile_picture,
       access_token: getToken(obj.id)
