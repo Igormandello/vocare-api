@@ -2,7 +2,7 @@ const router = require('express').Router();
 const sha256 = require('sha256');
 const mssql = require('mssql');
 const { runSql } = require('../db');
-const { createToken, invalidate } = require('../middleware/auth');
+const { createToken, invalidate, getToken } = require('../middleware/auth');
 
 router.get('/', (req, res) => {
   runSql('exec sp_users').then((result) => {
@@ -101,13 +101,53 @@ router.put('/:id(\\d+)', (req, res) => {
   if (req.user != req.params.id)
     return res.status(401).send();
 
-  runSql('exec sp_update_user @id, @email, @password, @username, @profile_picture',
+  runSql('exec sp_update_user @id, @email, @password, @username',
     { name: 'id', type: mssql.Int, value: req.params.id },
     { name: 'email', type: mssql.VarChar(255), value: req.body.email },
     { name: 'password', type: mssql.VarChar(64), value: sha256(req.body.password) },
-    { name: 'username', type: mssql.VarChar(30), value: req.body.username },
-    { name: 'profile_picture', type: mssql.VarBinary(mssql.MAX), value: req.body.profile_picture }
-  ).then(() => res.status(200).send())
+    { name: 'username', type: mssql.VarChar(30), value: req.body.username }
+  ).then((result) => {
+    if (result.recordset.length == 0) {
+      res.status(400).send();
+      return;
+    }
+
+    let obj = result.recordset[0];
+    res.send({
+      id: obj.id,
+      username: obj.username,
+      email: obj.email,
+      level: obj.level,
+      profile_picture: obj.profile_picture,
+      access_token: getToken(obj.id)
+    });
+  })
+  .catch(e => res.status(400).send(e));
+});
+
+router.put('/:id(\\d+)/profile_picture', (req, res) => {
+  if (req.user != req.params.id)
+    return res.status(401).send();
+
+  runSql('exec sp_update_user_picture @id, @profile_picture',
+    { name: 'id', type: mssql.Int, value: req.params.id },
+    { name: 'profile_picture', type: mssql.VarChar(mssql.MAX), value: req.body.profile_picture }
+  ).then((result) => {
+    if (result.recordset.length == 0) {
+      res.status(400).send();
+      return;
+    }
+
+    let obj = result.recordset[0];
+    res.send({
+      id: obj.id,
+      username: obj.username,
+      email: obj.email,
+      level: obj.level,
+      profile_picture: obj.profile_picture,
+      access_token: getToken(obj.id)
+    });
+  })
   .catch(e => res.status(400).send(e));
 });
 

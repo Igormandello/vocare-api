@@ -39,8 +39,7 @@ CREATE PROCEDURE sp_update_user
     @id int,
 	@email varchar(255),
 	@password varchar(64),
-    @username varchar(30),
-    @profile_picture varbinary(max)
+    @username varchar(30)
 AS
  IF NOT EXISTS(SELECT * FROM [user] WHERE id = @id)
  BEGIN
@@ -54,8 +53,25 @@ AS
     RETURN
  END
 
- UPDATE [user] set email = @email, password = @password, username = @username, profile_picture = @profile_picture
- WHERE id = @id
+ UPDATE [user] set email = @email, password = @password, username = @username WHERE id = @id
+
+ SELECT * FROM [user] WHERE id = @id
+GO
+
+---------------------------------------------------------------------------
+
+--Mofidies only the user picture
+CREATE PROCEDURE sp_update_user_picture
+    @id int,
+	@profile_picture varchar(max)
+AS
+ IF NOT EXISTS(SELECT * FROM [user] WHERE id = @id)
+ BEGIN
+    RAISERROR ('%s', 16, 1, 'Invalid user')
+    RETURN
+ END
+
+ UPDATE [user] set profile_picture = @profile_picture WHERE id = @id
 
  SELECT * FROM [user] WHERE id = @id
 GO
