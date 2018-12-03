@@ -11,7 +11,7 @@ global.errors = [
 
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '2MB', type:'application/json'}));
 app.use(require('./middleware/auth').checkAuth);
 
 app.use('/api/users', require('./controllers/usersController'));
