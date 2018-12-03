@@ -53,8 +53,13 @@ AS
     RETURN
  END
 
- UPDATE [user] set email = @email, password = @password, username = @username WHERE id = @id
+ IF NOT EXISTS(SELECT * FROM [user] WHERE id = @id and password = @password)
+ BEGIN
+    RAISERROR ('%s', 16, 2, 'Invalid password')
+    RETURN
+ END
 
+ UPDATE [user] set email = @email, username = @username WHERE id = @id and password = @password
  SELECT * FROM [user] WHERE id = @id
 GO
 
@@ -167,8 +172,10 @@ AS
     RETURN
  END
 
- UPDATE notification SET state = 1 where id in (SELECT TOP(@amount) id FROM (SELECT ROW_NUMBER() OVER(ORDER BY data) AS number, * FROM notification WHERE user_id = @id) indexes WHERE indexes.number > @offset)
- SELECT TOP(@amount) * FROM (SELECT ROW_NUMBER() OVER(ORDER BY data) AS number, * FROM notification WHERE user_id = @id) indexes WHERE indexes.number > @offset
+ DECLARE @total int
+ SET @total = @amount + @offset
+ UPDATE notification SET state = 1 where id in (SELECT TOP(@total) id FROM (SELECT ROW_NUMBER() OVER(ORDER BY data) AS number, * FROM notification WHERE user_id = @id) indexes WHERE indexes.number > @offset)
+ SELECT TOP(@total) * FROM (SELECT ROW_NUMBER() OVER(ORDER BY data) AS number, * FROM notification WHERE user_id = @id) indexes WHERE indexes.number > @offset
 GO
 
 ---------------------------------------------------------------------------

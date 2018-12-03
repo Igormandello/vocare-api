@@ -18,6 +18,7 @@ router.post('/login', (req, res) => {
       let obj = result.recordset[0];
       res.send({
         id: obj.id,
+        email: obj.email,
         username: obj.username,
         level: obj.level,
         profile_picture: obj.profile_picture,
@@ -37,6 +38,7 @@ router.post('/login', (req, res) => {
       let obj = result.recordset[0];
       res.send({
         id: obj.id,
+        email: obj.email,
         username: obj.username,
         level: obj.level,
         profile_picture: obj.profile_picture,

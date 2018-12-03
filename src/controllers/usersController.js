@@ -45,7 +45,7 @@ router.get('/:id(\\d+)/notifications', (req, res) => {
     return res.status(401).send();
 
   let offset = 0;
-  let page = req.params('page') || 0;
+  let page = req.param('page', 0);
   if (page && page > 0)
     offset = 10 * page;
 
