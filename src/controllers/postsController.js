@@ -3,9 +3,8 @@ const mssql = require('mssql');
 const { runSql } = require('../db');
 
 router.get('/', (req, res) => {
-  let offset = 0;
-  if (req.body.page && req.body.page > 0)
-    offset = 10 * req.body.page;
+  let page = req.param('page', 0);
+  let offset = 10 * page;
 
   runSql(`exec sp_discussion_posts ${offset}, 10`).then(result => {
     res.send(result.recordset);

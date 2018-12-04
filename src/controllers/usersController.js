@@ -29,7 +29,8 @@ router.get('/:id(\\d+)', (req, res) => {
     res.send({
       id: obj.id,
       username: obj.username,
-      level: obj.level
+      level: obj.level,
+      profile_picture: obj.profile_picture
     });
   });
 });
