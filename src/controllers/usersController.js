@@ -68,45 +68,81 @@ router.get('/:id(\\d+)/notifications/unreaden', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  if (req.body.email && req.body.password)
+  const { email, password, username, access_token, provider } = req.body;
+
+  if (email && password && username) {
+    try {
+      if (email.trim() === '' || password.trim() === '' || username.trim() === '') {
+        res.status(400).send();
+        return;
+      }
+    } catch(e) {
+      res.status(400).send('Invalid parameters');
+      return;
+    }
+
+    let usernameArr = username.split(' ');
+    usernameArr = usernameArr.map(obj => {
+      let str = obj.trim();
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    });
+
     runSql('exec sp_register_user @email, @password, @username',
-      { name: 'email', type: mssql.VarChar(255), value: req.body.email },
-      { name: 'password', type: mssql.VarChar(64), value: sha256(req.body.password) },
-      { name: 'username', type: mssql.VarChar(30), value: req.body.username }
+      { name: 'email', type: mssql.VarChar(255), value: email },
+      { name: 'password', type: mssql.VarChar(64), value: sha256(password) },
+      { name: 'username', type: mssql.VarChar(30), value: usernameArr.join(' ') }
+    ).then((result) => {
+      obj = result.recordset[0];
+      res.status(201).send({
+        id: obj.id,
+        email: obj.email,
+        username: obj.username,
+        level: obj.level,
+        profile_picture: obj.profile_picture,
+        access_token: createToken(obj.id)
+      });
+    }).catch(e => res.status(400).send(e));
+  } else if (access_token && provider)
+    runSql('exec sp_register_user_media @provider, @access_token, -1, @username',
+      { name: 'provider', type: mssql.VarChar(50), value: provider },
+      { name: 'access_token', type: mssql.VarChar(mssql.MAX), value: access_token },
+      { name: 'username', type: mssql.VarChar(30), value: username }
     ).then((result) => {
       result = result.recordset[0];
       res.status(201).send({
-        id: result.id,
-        username: result.username,
-        profile_picture: result.profile_picture,
-        access_token: createToken(result.id)
+        id: obj.id,
+        email: obj.email,
+        username: obj.username,
+        level: obj.level,
+        profile_picture: obj.profile_picture,
+        access_token: createToken(obj.id)
       });
     }).catch(e => res.status(400).send(e));
   else
-    runSql('exec sp_register_user_media @provider, @access_token, -1, @username',
-      { name: 'provider', type: mssql.VarChar(50), value: req.body.provider },
-      { name: 'access_token', type: mssql.VarChar(mssql.MAX), value: req.body.access_token },
-      { name: 'username', type: mssql.VarChar(30), value: req.body.username }
-    ).then((result) => {
-      result = result.recordset[0];
-      res.status(201).send({
-        id: result.id,
-        username: result.username,
-        profile_picture: result.profile_picture,
-        access_token: createToken(result.id)
-      });
-    }).catch(e => res.status(400).send(e));
+    res.status(400).send();
 });
 
 router.put('/:id(\\d+)', (req, res) => {
   if (req.user != req.params.id)
     return res.status(401).send();
 
+  const { id, email, password, username } = req.body;
+  if (email.trim() === '' || password.trim() === '' || username.trim() === '') {
+    res.status(400).send();
+    return;
+  }
+
+  let usernameArr = username.split(' ');
+  usernameArr = usernameArr.map(obj => {
+    let str = obj.trim();
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  });
+
   runSql('exec sp_update_user @id, @email, @password, @username',
-    { name: 'id', type: mssql.Int, value: req.params.id },
-    { name: 'email', type: mssql.VarChar(255), value: req.body.email },
-    { name: 'password', type: mssql.VarChar(64), value: sha256(req.body.password) },
-    { name: 'username', type: mssql.VarChar(30), value: req.body.username }
+    { name: 'id', type: mssql.Int, value: id },
+    { name: 'email', type: mssql.VarChar(255), value: email },
+    { name: 'password', type: mssql.VarChar(64), value: sha256(password) },
+    { name: 'username', type: mssql.VarChar(30), value: usernameArr.join(' ') }
   ).then((result) => {
     if (result.recordset.length == 0) {
       res.status(400).send();
